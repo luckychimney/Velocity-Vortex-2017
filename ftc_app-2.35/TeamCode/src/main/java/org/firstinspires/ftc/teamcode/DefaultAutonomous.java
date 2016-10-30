@@ -13,21 +13,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 @Autonomous(name = "Autonomous")
-public class DefaultAutonomous extends LinearOpMode
-{
+public class DefaultAutonomous extends LinearOpMode {
     private Robot robot = new Robot();
 
     @Override
-    public void runOpMode() throws InterruptedException
-    {
+    public void runOpMode() throws InterruptedException {
         int degreesToTurn;
         int distanceToDrive;
         VectorF beaconTranslation;
 
         robot.init(hardwareMap);
 
-        while(robot.gyroSensor.isCalibrating())
-        {
+        while (robot.gyroSensor.isCalibrating()) {
             telemetry.addData(">", "Calibrating gyro...");
             telemetry.update();
             idle();
@@ -42,8 +39,7 @@ public class DefaultAutonomous extends LinearOpMode
         telemetry.addData(">", "Robot running...");
         telemetry.update();
 
-        while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive())
-        {
+        while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive()) {
             drive(0.2, 50);
             sleep(1500);
         }
@@ -62,16 +58,14 @@ public class DefaultAutonomous extends LinearOpMode
         drive(0.2, 450);
     }
 
-    private int getDistanceToDrive(VectorF translation)
-    {
+    private int getDistanceToDrive(VectorF translation) {
         double x = translation.get(0);
         double z = translation.get(2);
 
         return (int) Math.round(Math.sqrt(Math.pow(x, 2) + Math.pow(Math.abs(z), 2)));
     }
 
-    private int getDegreesToTurn(VectorF translation)
-    {
+    private int getDegreesToTurn(VectorF translation) {
         double distanceFromPhoto = translation.get(0);
         double distanceFromWall = translation.get(2);
 
@@ -79,22 +73,18 @@ public class DefaultAutonomous extends LinearOpMode
     }
 
     @Nullable
-    private VectorF getVuforiaTrackableTranslation(VuforiaTrackables beacons)
-    {
-        for (VuforiaTrackable beacon : beacons)
-        {
+    private VectorF getVuforiaTrackableTranslation(VuforiaTrackables beacons) {
+        for (VuforiaTrackable beacon : beacons) {
             OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) beacon.getListener()).getPose();
 
-            if (pose != null)
-            {
+            if (pose != null) {
                 return pose.getTranslation();
             }
         }
         return null;
     }
 
-    private void stopDriveMotors()
-    {
+    private void stopDriveMotors() {
         robot.leftMotor.setPower(0);
         robot.rightMotor.setPower(0);
 
@@ -102,15 +92,14 @@ public class DefaultAutonomous extends LinearOpMode
         robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    private void drive(double power, int distance)
-    {
+    private void drive(double power, int distance) {
         double leftAdjustedPower;
         double rightAdjustedPower;
 
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        leftAdjustedPower = power * (getAbsGyroHeading()*robot.GYRO_DRIVE_COEFFICIENT);
+        leftAdjustedPower = power * (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
         rightAdjustedPower = -leftAdjustedPower;
 
         double encoderUnitsToDrive = robot.ENCODER_UNITS_PER_MILLIMETER * distance;
@@ -118,18 +107,13 @@ public class DefaultAutonomous extends LinearOpMode
         robot.leftMotor.setPower(leftAdjustedPower);
         robot.rightMotor.setPower(rightAdjustedPower);
 
-        if (distance > 0)
-        {
-            while (robot.leftMotor.getCurrentPosition() < encoderUnitsToDrive && opModeIsActive())
-            {
+        if (distance > 0) {
+            while (robot.leftMotor.getCurrentPosition() < encoderUnitsToDrive && opModeIsActive()) {
                 idle();
                 sleep(50);
             }
-        }
-        else
-        {
-            while (robot.leftMotor.getCurrentPosition() > encoderUnitsToDrive && opModeIsActive())
-            {
+        } else {
+            while (robot.leftMotor.getCurrentPosition() > encoderUnitsToDrive && opModeIsActive()) {
                 idle();
                 sleep(50);
             }
@@ -138,50 +122,37 @@ public class DefaultAutonomous extends LinearOpMode
         stopDriveMotors();
     }
 
-    private int getAbsGyroHeading()
-    {
-        if (robot.gyroSensor.getHeading() > 180)
-        {
+    private int getAbsGyroHeading() {
+        if (robot.gyroSensor.getHeading() > 180) {
             return robot.gyroSensor.getHeading() - 360;
-        }
-        else
-        {
+        } else {
             return robot.gyroSensor.getHeading();
         }
     }
 
-    private boolean isHeadingReached(double heading)
-    {
-        if (heading > 0)
-        {
-            return(getAbsGyroHeading() >= heading);
-        }
-        else
-        {
-            return(getAbsGyroHeading() <= heading);
+    private boolean isHeadingReached(double heading) {
+        if (heading > 0) {
+            return (getAbsGyroHeading() >= heading);
+        } else {
+            return (getAbsGyroHeading() <= heading);
         }
     }
 
-    private void turn(double power, int degrees)
-    {
+    private void turn(double power, int degrees) {
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         robot.gyroSensor.resetZAxisIntegrator();
 
-        if (degrees > 0)
-        {
+        if (degrees > 0) {
             robot.leftMotor.setPower(power);
             robot.rightMotor.setPower(-power);
-        }
-        else
-        {
+        } else {
             robot.leftMotor.setPower(-power);
             robot.rightMotor.setPower(power);
         }
 
-        while(!isHeadingReached(degrees) && opModeIsActive())
-        {
+        while (!isHeadingReached(degrees) && opModeIsActive()) {
             idle();
             sleep(50);
         }

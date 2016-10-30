@@ -10,25 +10,21 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-public class Robot
-{
+public class Robot {
+    final double GYRO_DRIVE_COEFFICIENT = 0.1;
+    private final int ENCODER_UNITS_PER_REVOLUTION = 1440;
+    private final double ENCODER_WHEEL_DIAMETER = 50.8;
+    final double ENCODER_UNITS_PER_MILLIMETER = (ENCODER_UNITS_PER_REVOLUTION / (ENCODER_WHEEL_DIAMETER * Math.PI));
+
     DcMotor leftMotor;
     DcMotor rightMotor;
-
     GyroSensor gyroSensor;
 
     private VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
     private VuforiaLocalizer vuforia = ClassFactory.createVuforiaLocalizer(parameters);
     VuforiaTrackables beacons = vuforia.loadTrackablesFromAsset("FTC_2016-17");
 
-    private final int ENCODER_UNITS_PER_REVOLUTION = 1440;
-    private final double ENCODER_WHEEL_DIAMETER = 50.8;
-    final double ENCODER_UNITS_PER_MILLIMETER = (ENCODER_UNITS_PER_REVOLUTION/(ENCODER_WHEEL_DIAMETER * Math.PI));
-
-    final double GYRO_DRIVE_COEFFICIENT = 0.1;
-
-    public void init(HardwareMap hardwareMap)
-    {
+    public void init(HardwareMap hardwareMap) {
         leftMotor = hardwareMap.dcMotor.get("left motor");
         leftMotor.setDirection(DcMotor.Direction.FORWARD);
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
