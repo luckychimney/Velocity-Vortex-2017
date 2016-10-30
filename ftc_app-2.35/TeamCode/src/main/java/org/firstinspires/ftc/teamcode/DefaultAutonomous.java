@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.support.annotation.Nullable;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -16,12 +17,13 @@ public class DefaultAutonomous extends LinearOpMode
 {
     private Robot robot = new Robot();
 
-    private int degreesToTurn;
-    private int distanceToDrive;
-
     @Override
     public void runOpMode() throws InterruptedException
     {
+        int degreesToTurn;
+        int distanceToDrive;
+        VectorF beaconTranslation;
+
         robot.init(hardwareMap);
 
         while(robot.gyroSensor.isCalibrating())
@@ -40,11 +42,16 @@ public class DefaultAutonomous extends LinearOpMode
         telemetry.addData(">", "Robot running...");
         telemetry.update();
 
-        while (!isVuforiaTrackableFound(robot.beacons) && opModeIsActive())
+        while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive())
         {
             drive(0.2, 50);
             sleep(1500);
         }
+
+        beaconTranslation = getVuforiaTrackableTranslation(robot.beacons);
+
+        distanceToDrive = getDistanceToDrive(beaconTranslation);
+        degreesToTurn = getDegreesToTurn(beaconTranslation);
 
         turn(0.2, degreesToTurn);
 
@@ -55,7 +62,24 @@ public class DefaultAutonomous extends LinearOpMode
         drive(0.2, 450);
     }
 
-    private boolean isVuforiaTrackableFound(VuforiaTrackables beacons)
+    private int getDistanceToDrive(VectorF translation)
+    {
+        double x = translation.get(0);
+        double z = translation.get(2);
+
+        return (int) Math.round(Math.sqrt(Math.pow(x, 2) + Math.pow(Math.abs(z), 2)));
+    }
+
+    private int getDegreesToTurn(VectorF translation)
+    {
+        double distanceFromPhoto = translation.get(0);
+        double distanceFromWall = translation.get(2);
+
+        return (int) Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
+    }
+
+    @Nullable
+    private VectorF getVuforiaTrackableTranslation(VuforiaTrackables beacons)
     {
         for (VuforiaTrackable beacon : beacons)
         {
@@ -63,18 +87,10 @@ public class DefaultAutonomous extends LinearOpMode
 
             if (pose != null)
             {
-                VectorF translation = pose.getTranslation();
-
-                double x = translation.get(0);
-                double z = translation.get(2);
-
-                degreesToTurn = (int) Math.round(Math.abs(Math.toDegrees(Math.atan2(x, z))) - 90);
-                distanceToDrive = (int) Math.round(Math.sqrt(Math.pow(x, 2) + Math.pow(Math.abs(z), 2)));
-
-                return true;
+                return pose.getTranslation();
             }
         }
-        return false;
+        return null;
     }
 
     private void stopDriveMotors()
@@ -134,7 +150,7 @@ public class DefaultAutonomous extends LinearOpMode
         }
     }
 
-    private boolean headingReached(double heading)
+    private boolean isHeadingReached(double heading)
     {
         if (heading > 0)
         {
@@ -164,7 +180,7 @@ public class DefaultAutonomous extends LinearOpMode
             robot.rightMotor.setPower(power);
         }
 
-        while(!headingReached(degrees) && opModeIsActive())
+        while(!isHeadingReached(degrees) && opModeIsActive())
         {
             idle();
             sleep(50);
