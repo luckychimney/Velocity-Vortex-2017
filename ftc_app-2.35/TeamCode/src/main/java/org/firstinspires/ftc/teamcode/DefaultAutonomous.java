@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.support.annotation.Nullable;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -76,6 +78,7 @@ public class DefaultAutonomous extends LinearOpMode
         return (int) Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
     }
 
+    @Nullable
     private VectorF getVuforiaTrackableTranslation(VuforiaTrackables beacons)
     {
         for (VuforiaTrackable beacon : beacons)
