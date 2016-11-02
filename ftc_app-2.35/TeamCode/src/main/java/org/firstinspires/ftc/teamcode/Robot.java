@@ -19,15 +19,13 @@ public class Robot
 	final double GYRO_DRIVE_COEFFICIENT = 0.1;
 	private final int ENCODER_UNITS_PER_REVOLUTION = 1440;
 	private final double ENCODER_WHEEL_DIAMETER = 50.8;
-	final double ENCODER_UNITS_PER_MILLIMETER =
-			(ENCODER_UNITS_PER_REVOLUTION / (ENCODER_WHEEL_DIAMETER * Math.PI));
+	final double ENCODER_UNITS_PER_MILLIMETER = (ENCODER_UNITS_PER_REVOLUTION / (ENCODER_WHEEL_DIAMETER * Math.PI));
 
 	DcMotor leftMotor;
 	DcMotor rightMotor;
 	GyroSensor gyroSensor;
 	VuforiaTrackables beacons;
-	private VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(
-			R.id.cameraMonitorViewId);
+	private VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
 
 	public void init(HardwareMap hardwareMap) throws FileNotFoundException
 	{
@@ -40,8 +38,8 @@ public class Robot
 		rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 		Scanner fileIn = new Scanner(new File("Vuforia Key.txt"));
-		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
 		parameters.vuforiaLicenseKey = fileIn.nextLine();
+		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
 		parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
 		Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 1);
 		VuforiaLocalizer vuforia = ClassFactory.createVuforiaLocalizer(parameters);

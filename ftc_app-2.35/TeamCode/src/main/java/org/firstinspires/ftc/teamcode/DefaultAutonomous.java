@@ -35,6 +35,9 @@ public class DefaultAutonomous extends LinearOpMode
 			e.printStackTrace();
 			telemetry.addData(">", "Vuforia key file not found");
 			telemetry.update();
+		}
+		finally
+		{
 			stop();
 		}
 
@@ -79,8 +82,7 @@ public class DefaultAutonomous extends LinearOpMode
 		double distanceFromPhoto = translation.get(0);
 		double distanceFromWall = translation.get(2);
 
-		return (int) Math.round(Math.sqrt(
-				Math.pow(distanceFromPhoto, 2) + Math.pow(Math.abs(distanceFromWall), 2)));
+		return (int) Math.round(Math.sqrt(Math.pow(distanceFromPhoto, 2) + Math.pow(Math.abs(distanceFromWall), 2)));
 	}
 
 	private int getDegreesToTurn(VectorF translation)
@@ -88,8 +90,7 @@ public class DefaultAutonomous extends LinearOpMode
 		double distanceFromPhoto = translation.get(0);
 		double distanceFromWall = translation.get(2);
 
-		return (int) Math.round(Math.abs(
-				Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
+		return (int) Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
 	}
 
 	@Nullable
@@ -133,8 +134,7 @@ public class DefaultAutonomous extends LinearOpMode
 		}
 		else
 		{
-			while (robot.getEncoderWheel().getCurrentPosition() > encoderUnitsToDrive &&
-			       opModeIsActive())
+			while (robot.getEncoderWheel().getCurrentPosition() > encoderUnitsToDrive && opModeIsActive())
 			{
 				leftAdjustedPower = power + (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
 				rightAdjustedPower = power - (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
