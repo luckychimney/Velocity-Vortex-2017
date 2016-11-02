@@ -39,7 +39,6 @@ public class Robot
 		rightMotor.setDirection(DcMotor.Direction.FORWARD);
 		rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-		// TODO Create Vuforia Key.txt and put the Vuforia Key in it
 		Scanner fileIn = new Scanner(new File("Vuforia Key.txt"));
 		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
 		parameters.vuforiaLicenseKey = fileIn.nextLine();
