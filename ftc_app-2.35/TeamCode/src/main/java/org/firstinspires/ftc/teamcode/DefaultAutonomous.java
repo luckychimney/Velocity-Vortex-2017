@@ -12,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
+import java.io.FileNotFoundException;
+
 @Autonomous(name = "Autonomous")
 public class DefaultAutonomous extends LinearOpMode
 {
@@ -24,9 +26,19 @@ public class DefaultAutonomous extends LinearOpMode
 		int distanceToDrive;
 		VectorF beaconTranslation;
 
-		robot.init(hardwareMap);
+		try
+		{
+			robot.init(hardwareMap);
+		}
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+			telemetry.addData(">", "Vuforia key file not found");
+			telemetry.update();
+			stop();
+		}
 
-		while (robot.gyroSensor.isCalibrating())
+		while (robot.gyroSensor.isCalibrating() & opModeIsActive())
 		{
 			telemetry.addData(">", "Calibrating gyro...");
 			telemetry.update();
