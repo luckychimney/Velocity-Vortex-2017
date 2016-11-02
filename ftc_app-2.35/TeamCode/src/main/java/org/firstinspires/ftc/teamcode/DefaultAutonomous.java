@@ -64,10 +64,11 @@ public class DefaultAutonomous extends LinearOpMode
 
 	private int getDistanceToDrive(VectorF translation)
 	{
-		double x = translation.get(0);
-		double z = translation.get(2);
+		double distanceFromPhoto = translation.get(0);
+		double distanceFromWall = translation.get(2);
 
-		return (int) Math.round(Math.sqrt(Math.pow(x, 2) + Math.pow(Math.abs(z), 2)));
+		return (int) Math.round(Math.sqrt(
+				Math.pow(distanceFromPhoto, 2) + Math.pow(Math.abs(distanceFromWall), 2)));
 	}
 
 	private int getDegreesToTurn(VectorF translation)
