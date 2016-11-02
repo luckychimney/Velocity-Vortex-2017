@@ -44,7 +44,7 @@ public class DefaultAutonomous extends LinearOpMode
 
 		while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive())
 		{
-			drive(0.2, 50);
+			drive(0.25, 150);
 			sleep(1500);
 		}
 
@@ -53,13 +53,13 @@ public class DefaultAutonomous extends LinearOpMode
 		distanceToDrive = getDistanceToDrive(beaconTranslation);
 		degreesToTurn = getDegreesToTurn(beaconTranslation);
 
-		turn(0.2, degreesToTurn);
+		turn(0.25, -degreesToTurn);
 
-		drive(0.2, distanceToDrive);
+		drive(0.25, distanceToDrive);
 
-		turn(0.2, 90 - degreesToTurn);
+		turn(0.25, -(90 - degreesToTurn));
 
-		drive(0.2, 450);
+		drive(0.25, 450);
 	}
 
 	private int getDistanceToDrive(VectorF translation)
@@ -102,18 +102,18 @@ public class DefaultAutonomous extends LinearOpMode
 		robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-		leftAdjustedPower = power * (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
-		rightAdjustedPower = -leftAdjustedPower;
-
 		double encoderUnitsToDrive = robot.ENCODER_UNITS_PER_MILLIMETER * distance;
 
-		robot.leftMotor.setPower(leftAdjustedPower);
-		robot.rightMotor.setPower(rightAdjustedPower);
+		robot.gyroSensor.resetZAxisIntegrator();
 
 		if (distance > 0)
 		{
-			while (robot.leftMotor.getCurrentPosition() < encoderUnitsToDrive && opModeIsActive())
+			while (robot.rightMotor.getCurrentPosition() < encoderUnitsToDrive && opModeIsActive())
 			{
+				leftAdjustedPower = power - (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
+				rightAdjustedPower = power + (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
+				robot.leftMotor.setPower(leftAdjustedPower);
+				robot.rightMotor.setPower(rightAdjustedPower);
 				idle();
 				sleep(50);
 			}
@@ -122,6 +122,10 @@ public class DefaultAutonomous extends LinearOpMode
 		{
 			while (robot.leftMotor.getCurrentPosition() > encoderUnitsToDrive && opModeIsActive())
 			{
+				leftAdjustedPower = power + (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
+				rightAdjustedPower = power - (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
+				robot.leftMotor.setPower(leftAdjustedPower);
+				robot.rightMotor.setPower(rightAdjustedPower);
 				idle();
 				sleep(50);
 			}
