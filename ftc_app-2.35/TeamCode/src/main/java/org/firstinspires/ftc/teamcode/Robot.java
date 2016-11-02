@@ -24,7 +24,6 @@ public class Robot
 	VuforiaTrackables beacons;
 	private VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(
 			R.id.cameraMonitorViewId);
-	private VuforiaLocalizer vuforia;
 
 	public void init(HardwareMap hardwareMap)
 	{
@@ -41,7 +40,7 @@ public class Robot
 				"AVjSL4f/////AAAAGRrqOmjjwUvcra1uL+pn/W8AoLn03Yj7g6Aw+VGRAI+CkzXWFw/7FLW09TYRSzxCcQmlWovvlsq9k4DqqxDr+bnAVhsmk+MNEzKyMBqkwMM6BGjEL6ohtkGbMiE+sYL0aWgZ+ULu6pPJZQboiH/sEcH2jq8o5zAVe3lbP9E34gCELlHAIzgEta7lXabdjC86OixIDZbdEBpE5UTGPRFKTbYgKFVNoouFgUT4hs5MiqD21DwbubgmSe+WOVyi3G4WTkJowT9jx1XlOrUXwc6kfyArQ+DFQNXEghwAXhC9FOEWijQTKSG+TDq7XePfRICqLPEdl4aYUixHn6OCCPZ85o7bEaBYf74ZddKg7IBTCOsg";
 		parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
 		Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 1);
-		vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+		VuforiaLocalizer vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
 		beacons = vuforia.loadTrackablesFromAsset("FTC_2016-17");
 		beacons.get(0).setName("Wheels");
@@ -52,5 +51,10 @@ public class Robot
 
 		gyroSensor = hardwareMap.gyroSensor.get("gyro");
 		gyroSensor.calibrate();
+	}
+
+	DcMotor getEncoderWheel()
+	{
+		return rightMotor;
 	}
 }
