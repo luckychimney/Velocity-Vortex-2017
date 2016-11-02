@@ -52,4 +52,9 @@ public class Robot
 		gyroSensor = hardwareMap.gyroSensor.get("gyro");
 		gyroSensor.calibrate();
 	}
+
+	DcMotor getEncoderWheel()
+	{
+		return rightMotor;
+	}
 }

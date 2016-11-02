@@ -120,7 +120,8 @@ public class DefaultAutonomous extends LinearOpMode
 		}
 		else
 		{
-			while (robot.leftMotor.getCurrentPosition() > encoderUnitsToDrive && opModeIsActive())
+			while (robot.getEncoderWheel().getCurrentPosition() > encoderUnitsToDrive &&
+			       opModeIsActive())
 			{
 				leftAdjustedPower = power + (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
 				rightAdjustedPower = power - (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
