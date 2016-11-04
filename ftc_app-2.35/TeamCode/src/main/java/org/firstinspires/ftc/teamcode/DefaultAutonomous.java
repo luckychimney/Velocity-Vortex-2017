@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
@@ -59,7 +60,7 @@ public class DefaultAutonomous extends LinearOpMode
 
 		while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive())
 		{
-			drive(0.25, 150);
+			drive(robot.DEFAULT_DRIVE_SPEED, 150);
 			sleep(1500);
 		}
 
@@ -68,13 +69,13 @@ public class DefaultAutonomous extends LinearOpMode
 		distanceToDrive = getDistanceToDrive(beaconTranslation);
 		degreesToTurn = getDegreesToTurn(beaconTranslation);
 
-		turn(0.25, -degreesToTurn);
+		turn(robot.DEFAULT_TURN_SPEED, -degreesToTurn);
 
-		drive(0.25, distanceToDrive);
+		drive(robot.DEFAULT_DRIVE_SPEED, distanceToDrive);
 
-		turn(0.25, -(90 - degreesToTurn));
+		turn(robot.DEFAULT_TURN_SPEED, -(90 - degreesToTurn));
 
-		drive(0.25, 450);
+		drive(robot.DEFAULT_DRIVE_SPEED, 450);
 	}
 
 	private int getDistanceToDrive(VectorF translation)
@@ -120,32 +121,29 @@ public class DefaultAutonomous extends LinearOpMode
 
 		robot.gyroSensor.resetZAxisIntegrator();
 
-		if (distance > 0)
+		while (Math.abs(robot.rightMotor.getCurrentPosition()) < encoderUnitsToDrive && opModeIsActive())
 		{
-			while (robot.rightMotor.getCurrentPosition() < encoderUnitsToDrive && opModeIsActive())
-			{
-				leftAdjustedPower = power - (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
-				rightAdjustedPower = power + (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
-				robot.leftMotor.setPower(leftAdjustedPower);
-				robot.rightMotor.setPower(rightAdjustedPower);
-				idle();
-				sleep(50);
-			}
-		}
-		else
-		{
-			while (robot.getEncoderWheel().getCurrentPosition() > encoderUnitsToDrive && opModeIsActive())
-			{
-				leftAdjustedPower = power + (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
-				rightAdjustedPower = power - (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
-				robot.leftMotor.setPower(leftAdjustedPower);
-				robot.rightMotor.setPower(rightAdjustedPower);
-				idle();
-				sleep(50);
-			}
+			leftAdjustedPower = Range.clip(power - getPowerAdjustment(), 0, 1);
+			rightAdjustedPower = Range.clip(power + getPowerAdjustment(), 0, 1);
+			robot.leftMotor.setPower(leftAdjustedPower);
+			robot.rightMotor.setPower(rightAdjustedPower);
+			idle();
+			sleep(50);
 		}
 
 		stopDriveMotors();
+	}
+
+	private double getPowerAdjustment()
+	{
+		if (robot.rightMotor.getPower() > 0)
+		{
+			return (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
+		}
+		else
+		{
+			return -(getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
+		}
 	}
 
 	private void stopDriveMotors()
