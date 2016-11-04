@@ -121,7 +121,7 @@ public class DefaultAutonomous extends LinearOpMode
 
 		robot.gyroSensor.resetZAxisIntegrator();
 
-		while (Math.abs(robot.rightMotor.getCurrentPosition()) < encoderUnitsToDrive && opModeIsActive())
+		while (Math.abs(robot.getEncoderWheel().getCurrentPosition()) < encoderUnitsToDrive && opModeIsActive())
 		{
 			leftAdjustedPower = Range.clip(power - getPowerAdjustment(), 0, 1);
 			rightAdjustedPower = Range.clip(power + getPowerAdjustment(), 0, 1);
