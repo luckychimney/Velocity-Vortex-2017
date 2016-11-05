@@ -43,9 +43,12 @@ public class DefaultAutonomous extends LinearOpMode
 		telemetry.addData(">", "Robot running...");
 		telemetry.update();
 
+		drive(robot.DEFAULT_DRIVE_SPEED, 775);
+		sleep(1500);
+
 		while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive())
 		{
-			drive(robot.DEFAULT_DRIVE_SPEED, 775);
+			drive(robot.DEFAULT_DRIVE_SPEED, 20);
 			sleep(1500);
 		}
 
@@ -65,10 +68,10 @@ public class DefaultAutonomous extends LinearOpMode
 
 	private int getDistanceToDrive(VectorF translation)
 	{
-		double distanceFromPhotoXAxesPlane = translation.get(0);
+		double distanceFromImageXAxesPlane = translation.get(0);
 		double distanceFromWallBuffer = translation.get(2) - 450;
 
-		return (int) Math.round(Math.sqrt(Math.pow(distanceFromPhotoXAxesPlane, 2) + Math.pow(Math.abs(distanceFromWallBuffer), 2)));
+		return (int) Math.round(Math.sqrt(Math.pow(distanceFromImageXAxesPlane, 2) + Math.pow(Math.abs(distanceFromWallBuffer), 2)));
 	}
 
 	private int getDegreesToTurn(VectorF translation)
@@ -152,12 +155,34 @@ public class DefaultAutonomous extends LinearOpMode
 		}
 	}
 
+	private double getError(double target, double heading)
+	{
+		return ((target - heading) * robot.TURN_COEFFICIENT) / 100;
+	}
+
+	private double getTurnSpeed(double speed, double err)
+	{
+		double power = speed * err;
+		if (power >= 0)
+		{
+			power += 20;
+		}
+		else
+		{
+			power -= 20;
+		}
+
+		return power / 100;
+	}
+
 	private void turn(double power, int degrees)
 	{
 		robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 		robot.gyroSensor.resetZAxisIntegrator();
+
+		//double speed = getTurnSpeed(power, getError(degrees, getAbsGyroHeading()));
 
 		if (degrees > 0)
 		{

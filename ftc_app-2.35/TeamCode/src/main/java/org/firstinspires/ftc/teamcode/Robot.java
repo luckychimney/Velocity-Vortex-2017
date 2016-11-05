@@ -13,9 +13,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 public class Robot
 {
 	final double GYRO_DRIVE_COEFFICIENT = 0.1;
+	final double TURN_COEFFICIENT = 1;
 	final double DEFAULT_DRIVE_SPEED = 0.1;
 	final double DEFAULT_TURN_SPEED = 0.1;
-	
+
 	private final int ENCODER_UNITS_PER_REVOLUTION = 1440;
 	private final double ENCODER_WHEEL_DIAMETER = 50.8;
 	final double ENCODER_UNITS_PER_MILLIMETER = (ENCODER_UNITS_PER_REVOLUTION / (ENCODER_WHEEL_DIAMETER * Math.PI));

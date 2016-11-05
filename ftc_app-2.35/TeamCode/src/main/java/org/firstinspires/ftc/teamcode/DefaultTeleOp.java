@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "TeleOp")
 public class DefaultTeleOp extends LinearOpMode
@@ -11,31 +12,55 @@ public class DefaultTeleOp extends LinearOpMode
 	@Override
 	public void runOpMode() throws InterruptedException
 	{
-		double right_speed;
-		double left_speed;
-		
+		double DEFAULT_SPEED_COEFFICIENT = .75;
+		double SLOW_SPEED_COEFFICIENT = 0.25;
+		double DEAD_ZONE = 0.1;
+
+		double rightMotorSpeed;
+		double leftMotorSpeed;
+
+		robot.init(hardwareMap);
+
 		waitForStart();
+
+		robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 		while (opModeIsActive())
 		{
-			if (gamepad1.right_bumper)
+			if (Math.abs(gamepad1.right_stick_y) > DEAD_ZONE)
 			{
-				right_speed = gamepad1.right_stick_y * 1;
-				left_speed = gamepad1.left_stick_y * 1;
-			}
-			else if (gamepad1.left_bumper)
-			{
-				right_speed = gamepad1.right_stick_y * 0.55;
-				left_speed = gamepad1.left_stick_y * 0.55;
+				rightMotorSpeed = gamepad1.right_stick_y;
 			}
 			else
 			{
-				right_speed = gamepad1.right_stick_y * 0.75;
-				left_speed = gamepad1.left_stick_y * 0.75;
+				rightMotorSpeed = 0;
 			}
 
-			robot.rightMotor.setPower(right_speed);
-			robot.leftMotor.setPower(left_speed);
+			if (Math.abs(gamepad1.left_stick_y) > DEAD_ZONE)
+			{
+				leftMotorSpeed = gamepad1.left_stick_y;
+			}
+			else
+			{
+				leftMotorSpeed = 0;
+			}
+
+			if (gamepad1.left_bumper)
+			{
+				rightMotorSpeed = rightMotorSpeed * SLOW_SPEED_COEFFICIENT;
+				leftMotorSpeed = leftMotorSpeed * SLOW_SPEED_COEFFICIENT;
+			}
+			else
+			{
+				rightMotorSpeed = rightMotorSpeed * DEFAULT_SPEED_COEFFICIENT;
+				leftMotorSpeed = leftMotorSpeed * DEFAULT_SPEED_COEFFICIENT;
+			}
+
+			// TODO add the other functions of the robot to tele op
+
+			robot.rightMotor.setPower(-rightMotorSpeed);
+			robot.leftMotor.setPower(-leftMotorSpeed);
 		}
 	}
 }

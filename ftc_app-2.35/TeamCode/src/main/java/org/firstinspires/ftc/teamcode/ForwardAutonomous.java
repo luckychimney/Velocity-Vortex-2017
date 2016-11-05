@@ -31,7 +31,10 @@ public class ForwardAutonomous extends LinearOpMode
 		telemetry.addData(">", "Robot running...");
 		telemetry.update();
 
-		drive(0.4, 1250);
+		drive(0.4, 780);
+		turn(0.5, -45);
+		turn(0.5, 45);
+		drive(0.4, 75);
 	}
 
 	private void drive(double power, int distance)
