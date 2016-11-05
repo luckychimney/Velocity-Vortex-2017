@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.support.annotation.Nullable;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 @Autonomous(name = "Autonomous")
+@Disabled
 public class DefaultAutonomous extends LinearOpMode
 {
 	private Robot robot = new Robot();

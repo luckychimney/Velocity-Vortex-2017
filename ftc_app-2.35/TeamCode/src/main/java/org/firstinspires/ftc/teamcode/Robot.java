@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
 
@@ -23,6 +25,9 @@ public class Robot
 
 	DcMotor leftMotor;
 	DcMotor rightMotor;
+	DcMotor ballLauncher;
+	DcMotor ballCollector;
+	Servo ballDeployer;
 	GyroSensor gyroSensor;
 	VuforiaTrackables beacons;
 
@@ -35,6 +40,18 @@ public class Robot
 		rightMotor = hardwareMap.dcMotor.get("right motor");
 		rightMotor.setDirection(DcMotor.Direction.FORWARD);
 		rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+		ballLauncher = hardwareMap.dcMotor.get("ball launcher");
+		ballLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
+		ballLauncher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+		ballCollector = hardwareMap.dcMotor.get("ball collector");
+		ballCollector.setDirection(DcMotorSimple.Direction.REVERSE);
+		ballCollector.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+		ballDeployer = hardwareMap.servo.get("ball deployer");
+		ballDeployer.setDirection(Servo.Direction.FORWARD);
+		ballDeployer.setPosition(1);
 
 		VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
 		parameters.vuforiaLicenseKey = "AVjSL4f/////AAAAGRrqOmjjwUvcra1uL+pn/W8AoLn03Yj7g6Aw+VGRAI+CkzXWFw/7FLW09TYRSzxCcQmlWovvlsq9k4DqqxDr+bnAVhsmk+MNEzKyMBqkwMM6BGjEL6ohtkGbMiE+sYL0aWgZ+ULu6pPJZQboiH/sEcH2jq8o5zAVe3lbP9E34gCELlHAIzgEta7lXabdjC86OixIDZbdEBpE5UTGPRFKTbYgKFVNoouFgUT4hs5MiqD21DwbubgmSe+WOVyi3G4WTkJowT9jx1XlOrUXwc6kfyArQ+DFQNXEghwAXhC9FOEWijQTKSG+TDq7XePfRICqLPEdl4aYUixHn6OCCPZ85o7bEaBYf74ZddKg7IBTCOsg";

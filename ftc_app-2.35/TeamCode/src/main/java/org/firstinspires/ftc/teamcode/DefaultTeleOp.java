@@ -12,7 +12,7 @@ public class DefaultTeleOp extends LinearOpMode
 	@Override
 	public void runOpMode() throws InterruptedException
 	{
-		double DEFAULT_SPEED_COEFFICIENT = .75;
+		double DEFAULT_SPEED_COEFFICIENT = 1;
 		double SLOW_SPEED_COEFFICIENT = 0.25;
 		double DEAD_ZONE = 0.1;
 
@@ -46,7 +46,7 @@ public class DefaultTeleOp extends LinearOpMode
 				leftMotorSpeed = 0;
 			}
 
-			if (gamepad1.left_bumper)
+			if (gamepad1.right_bumper)
 			{
 				rightMotorSpeed = rightMotorSpeed * SLOW_SPEED_COEFFICIENT;
 				leftMotorSpeed = leftMotorSpeed * SLOW_SPEED_COEFFICIENT;
@@ -57,10 +57,36 @@ public class DefaultTeleOp extends LinearOpMode
 				leftMotorSpeed = leftMotorSpeed * DEFAULT_SPEED_COEFFICIENT;
 			}
 
-			// TODO add the other functions of the robot to tele op
+			if (gamepad1.right_trigger > 0)
+			{
+				robot.ballDeployer.setPosition(0.75);
+			}
+			else
+			{
+				robot.ballDeployer.setPosition(1);
+			}
 
-			robot.rightMotor.setPower(-rightMotorSpeed);
-			robot.leftMotor.setPower(-leftMotorSpeed);
+
+			if (gamepad1.left_bumper)
+			{
+				robot.ballCollector.setPower(1);
+			}
+			else
+			{
+				robot.ballCollector.setPower(0);
+			}
+
+			if (gamepad1.left_trigger > 0)
+			{
+				robot.ballLauncher.setPower(1);
+			}
+			else
+			{
+				robot.ballLauncher.setPower(0);
+			}
+
+			robot.rightMotor.setPower(rightMotorSpeed);
+			robot.leftMotor.setPower(leftMotorSpeed);
 		}
 	}
 }
