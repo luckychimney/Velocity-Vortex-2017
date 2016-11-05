@@ -13,8 +13,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-import java.io.FileNotFoundException;
-
 @Autonomous(name = "Autonomous")
 public class DefaultAutonomous extends LinearOpMode
 {
@@ -27,17 +25,7 @@ public class DefaultAutonomous extends LinearOpMode
 		int distanceToDrive;
 		VectorF beaconTranslation;
 
-		try
-		{
-			robot.init(hardwareMap);
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-			telemetry.addData(">", "Vuforia key file not found");
-			telemetry.update();
-			stop();
-		}
+		robot.init(hardwareMap);
 
 		while (robot.gyroSensor.isCalibrating() & opModeIsActive())
 		{
@@ -57,21 +45,21 @@ public class DefaultAutonomous extends LinearOpMode
 
 		while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive())
 		{
-			drive(robot.DEFAULT_DRIVE_SPEED, 350);
+			drive(robot.DEFAULT_DRIVE_SPEED, 775);
 			sleep(1500);
 		}
 
 		beaconTranslation = getVuforiaTrackableTranslation(robot.beacons);
-
 		distanceToDrive = getDistanceToDrive(beaconTranslation);
 		degreesToTurn = getDegreesToTurn(beaconTranslation);
 
-		turn(robot.DEFAULT_TURN_SPEED, -degreesToTurn);
+		telemetry.addData("Drive Distance", distanceToDrive);
+		telemetry.addData("Turn Degrees", degreesToTurn);
+		telemetry.update();
 
+		turn(robot.DEFAULT_TURN_SPEED, degreesToTurn);
 		drive(robot.DEFAULT_DRIVE_SPEED, distanceToDrive);
-
-		turn(robot.DEFAULT_TURN_SPEED, -(90 - degreesToTurn));
-
+		turn(robot.DEFAULT_TURN_SPEED, -(90 + degreesToTurn));
 		drive(robot.DEFAULT_DRIVE_SPEED, 440);
 	}
 
@@ -88,7 +76,7 @@ public class DefaultAutonomous extends LinearOpMode
 		double distanceFromPhoto = translation.get(0);
 		double distanceFromWall = translation.get(2);
 
-		return (int) Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
+		return (int) -Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
 	}
 
 	@Nullable

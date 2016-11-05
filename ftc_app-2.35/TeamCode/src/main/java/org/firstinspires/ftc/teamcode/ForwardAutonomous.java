@@ -5,8 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
-import java.io.FileNotFoundException;
-
 @Autonomous(name = "Basic Autonomous")
 public class ForwardAutonomous extends LinearOpMode
 {
@@ -15,18 +13,7 @@ public class ForwardAutonomous extends LinearOpMode
 	@Override
 	public void runOpMode() throws InterruptedException
 	{
-
-		try
-		{
-			robot.init(hardwareMap);
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-			telemetry.addData(">", "Vuforia key file not found");
-			telemetry.update();
-			stop();
-		}
+		robot.init(hardwareMap);
 
 		while (robot.gyroSensor.isCalibrating() & opModeIsActive())
 		{
@@ -44,7 +31,7 @@ public class ForwardAutonomous extends LinearOpMode
 		telemetry.addData(">", "Robot running...");
 		telemetry.update();
 
-		drive(0.4, 1500);
+		drive(0.4, 1250);
 	}
 
 	private void drive(double power, int distance)
