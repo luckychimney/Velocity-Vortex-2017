@@ -1,31 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.support.annotation.Nullable;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-
 import java.io.FileNotFoundException;
 
-@Autonomous(name = "Autonomous")
-public class DefaultAutonomous extends LinearOpMode
+@Autonomous(name = "Basic Autonomous")
+public class ForwardAutonomous extends LinearOpMode
 {
 	private Robot robot = new Robot();
 
 	@Override
 	public void runOpMode() throws InterruptedException
 	{
-		int degreesToTurn;
-		int distanceToDrive;
-		VectorF beaconTranslation;
 
 		try
 		{
@@ -55,55 +44,7 @@ public class DefaultAutonomous extends LinearOpMode
 		telemetry.addData(">", "Robot running...");
 		telemetry.update();
 
-		while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive())
-		{
-			drive(robot.DEFAULT_DRIVE_SPEED, 350);
-			sleep(1500);
-		}
-
-		beaconTranslation = getVuforiaTrackableTranslation(robot.beacons);
-
-		distanceToDrive = getDistanceToDrive(beaconTranslation);
-		degreesToTurn = getDegreesToTurn(beaconTranslation);
-
-		turn(robot.DEFAULT_TURN_SPEED, -degreesToTurn);
-
-		drive(robot.DEFAULT_DRIVE_SPEED, distanceToDrive);
-
-		turn(robot.DEFAULT_TURN_SPEED, -(90 - degreesToTurn));
-
-		drive(robot.DEFAULT_DRIVE_SPEED, 440);
-	}
-
-	private int getDistanceToDrive(VectorF translation)
-	{
-		double distanceFromPhotoXAxesPlane = translation.get(0);
-		double distanceFromWallBuffer = translation.get(2) - 450;
-
-		return (int) Math.round(Math.sqrt(Math.pow(distanceFromPhotoXAxesPlane, 2) + Math.pow(Math.abs(distanceFromWallBuffer), 2)));
-	}
-
-	private int getDegreesToTurn(VectorF translation)
-	{
-		double distanceFromPhoto = translation.get(0);
-		double distanceFromWall = translation.get(2);
-
-		return (int) Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
-	}
-
-	@Nullable
-	private VectorF getVuforiaTrackableTranslation(VuforiaTrackables beacons)
-	{
-		for (VuforiaTrackable beacon : beacons)
-		{
-			OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) beacon.getListener()).getPose();
-
-			if (pose != null)
-			{
-				return pose.getTranslation();
-			}
-		}
-		return null;
+		drive(0.4, 1500);
 	}
 
 	private void drive(double power, int distance)
