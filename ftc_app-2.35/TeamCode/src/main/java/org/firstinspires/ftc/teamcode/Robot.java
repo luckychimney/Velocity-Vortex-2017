@@ -15,9 +15,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 public class Robot
 {
 	final double GYRO_DRIVE_COEFFICIENT = 0.1;
-	final double TURN_COEFFICIENT = 1;
+	final double TURN_COEFFICIENT = 0.03;
 	final double DEFAULT_DRIVE_SPEED = 0.1;
 	final double DEFAULT_TURN_SPEED = 0.1;
+	final double MINIMUM_SPEED = - 0.27;
+	final int TURN_HEADING_THRESHOLD = 1;
 
 	private final int ENCODER_UNITS_PER_REVOLUTION = 1440;
 	private final double ENCODER_WHEEL_DIAMETER = 50.8;
@@ -44,6 +46,7 @@ public class Robot
 		ballLauncher = hardwareMap.dcMotor.get("ball launcher");
 		ballLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
 		ballLauncher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		ballLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
 		ballCollector = hardwareMap.dcMotor.get("ball collector");
 		ballCollector.setDirection(DcMotorSimple.Direction.REVERSE);

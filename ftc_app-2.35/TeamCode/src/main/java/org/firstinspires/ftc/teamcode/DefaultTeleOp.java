@@ -46,7 +46,7 @@ public class DefaultTeleOp extends LinearOpMode
 				leftMotorSpeed = 0;
 			}
 
-			if (gamepad1.right_bumper)
+			if (gamepad2.right_bumper)
 			{
 				rightMotorSpeed = rightMotorSpeed * SLOW_SPEED_COEFFICIENT;
 				leftMotorSpeed = leftMotorSpeed * SLOW_SPEED_COEFFICIENT;
@@ -57,7 +57,7 @@ public class DefaultTeleOp extends LinearOpMode
 				leftMotorSpeed = leftMotorSpeed * DEFAULT_SPEED_COEFFICIENT;
 			}
 
-			if (gamepad1.right_trigger > 0)
+			if (gamepad2.right_trigger > 0)
 			{
 				robot.ballDeployer.setPosition(0.75);
 			}
@@ -67,7 +67,7 @@ public class DefaultTeleOp extends LinearOpMode
 			}
 
 
-			if (gamepad1.left_bumper)
+			if (gamepad2.left_bumper)
 			{
 				robot.ballCollector.setPower(1);
 			}
@@ -76,7 +76,7 @@ public class DefaultTeleOp extends LinearOpMode
 				robot.ballCollector.setPower(0);
 			}
 
-			if (gamepad1.left_trigger > 0)
+			if (gamepad2.left_trigger > 0)
 			{
 				robot.ballLauncher.setPower(1);
 			}

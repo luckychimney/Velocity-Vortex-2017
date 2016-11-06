@@ -157,48 +157,43 @@ public class DefaultAutonomous extends LinearOpMode
 		}
 	}
 
-	private double getError(double target, double heading)
+	private double getTurnPower(double power, double error)
 	{
-		return ((target - heading) * robot.TURN_COEFFICIENT) / 100;
-	}
+		double turnPower = power * error;
 
-	private double getTurnSpeed(double speed, double err)
-	{
-		double power = speed * err;
-		if (power >= 0)
+		if (turnPower >= 0)
 		{
-			power += 20;
+			turnPower += robot.MINIMUM_SPEED;
 		}
 		else
 		{
-			power -= 20;
+			turnPower -= robot.MINIMUM_SPEED;
 		}
 
-		return power / 100;
+		return turnPower;
 	}
 
-	private void turn(double power, int degrees)
+	private double getTurnError(double target, double heading)
 	{
+		return ((target - heading) / 100) * robot.TURN_COEFFICIENT;
+	}
+
+	private void turn(double power, int angle)
+	{
+		double leftMotorPower;
+		double rightMotorPower;
+
 		robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 		robot.gyroSensor.resetZAxisIntegrator();
 
-		//double speed = getTurnSpeed(power, getError(degrees, getAbsGyroHeading()));
-
-		if (degrees > 0)
+		while (!isHeadingReached(angle) && opModeIsActive())
 		{
-			robot.leftMotor.setPower(power);
-			robot.rightMotor.setPower(-power);
-		}
-		else
-		{
-			robot.leftMotor.setPower(-power);
-			robot.rightMotor.setPower(power);
-		}
-
-		while (!isHeadingReached(degrees) && opModeIsActive())
-		{
+			leftMotorPower = -getTurnPower(power, getTurnError(angle, getAbsGyroHeading()));
+			rightMotorPower = getTurnPower(power, getTurnError(angle, getAbsGyroHeading()));
+			robot.leftMotor.setPower(leftMotorPower);
+			robot.rightMotor.setPower(rightMotorPower);
 			idle();
 			sleep(50);
 		}
@@ -206,15 +201,10 @@ public class DefaultAutonomous extends LinearOpMode
 		stopDriveMotors();
 	}
 
-	private boolean isHeadingReached(double heading)
+	private boolean isHeadingReached(int targetHeading)
 	{
-		if (heading > 0)
-		{
-			return (getAbsGyroHeading() >= heading);
-		}
-		else
-		{
-			return (getAbsGyroHeading() <= heading);
-		}
+		int headingError = targetHeading - getAbsGyroHeading();
+
+		return (Math.abs(headingError) <= robot.TURN_HEADING_THRESHOLD);
 	}
 }
