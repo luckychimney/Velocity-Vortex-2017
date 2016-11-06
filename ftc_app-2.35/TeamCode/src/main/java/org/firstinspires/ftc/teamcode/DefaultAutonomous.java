@@ -96,6 +96,7 @@ public class DefaultAutonomous extends LinearOpMode
 				return pose.getTranslation();
 			}
 		}
+
 		return null;
 	}
 
