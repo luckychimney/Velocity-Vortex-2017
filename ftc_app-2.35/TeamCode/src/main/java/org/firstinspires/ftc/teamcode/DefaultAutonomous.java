@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.support.annotation.Nullable;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
@@ -13,9 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-import java.io.FileNotFoundException;
-
 @Autonomous(name = "Autonomous")
+@Disabled
 public class DefaultAutonomous extends LinearOpMode
 {
 	private Robot robot = new Robot();
@@ -27,20 +27,7 @@ public class DefaultAutonomous extends LinearOpMode
 		int distanceToDrive;
 		VectorF beaconTranslation;
 
-		try
-		{
-			robot.init(hardwareMap);
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-			telemetry.addData(">", "Vuforia key file not found");
-			telemetry.update();
-		}
-		finally
-		{
-			stop();
-		}
+		robot.init(hardwareMap);
 
 		while (robot.gyroSensor.isCalibrating() & opModeIsActive())
 		{
@@ -58,32 +45,35 @@ public class DefaultAutonomous extends LinearOpMode
 		telemetry.addData(">", "Robot running...");
 		telemetry.update();
 
+		drive(robot.DEFAULT_DRIVE_SPEED, 775);
+		sleep(1500);
+
 		while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive())
 		{
-			drive(robot.DEFAULT_DRIVE_SPEED, 150);
+			drive(robot.DEFAULT_DRIVE_SPEED, 20);
 			sleep(1500);
 		}
 
 		beaconTranslation = getVuforiaTrackableTranslation(robot.beacons);
-
 		distanceToDrive = getDistanceToDrive(beaconTranslation);
 		degreesToTurn = getDegreesToTurn(beaconTranslation);
 
-		turn(robot.DEFAULT_TURN_SPEED, -degreesToTurn);
+		telemetry.addData("Drive Distance", distanceToDrive);
+		telemetry.addData("Turn Degrees", degreesToTurn);
+		telemetry.update();
 
+		turn(robot.DEFAULT_TURN_SPEED, degreesToTurn);
 		drive(robot.DEFAULT_DRIVE_SPEED, distanceToDrive);
-
-		turn(robot.DEFAULT_TURN_SPEED, -(90 - degreesToTurn));
-
-		drive(robot.DEFAULT_DRIVE_SPEED, 450);
+		turn(robot.DEFAULT_TURN_SPEED, -(90 + degreesToTurn));
+		drive(robot.DEFAULT_DRIVE_SPEED, 440);
 	}
 
 	private int getDistanceToDrive(VectorF translation)
 	{
-		double distanceFromPhoto = translation.get(0);
-		double distanceFromWall = translation.get(2);
+		double distanceFromImageXAxesPlane = translation.get(0);
+		double distanceFromWallBuffer = translation.get(2) - 450;
 
-		return (int) Math.round(Math.sqrt(Math.pow(distanceFromPhoto, 2) + Math.pow(Math.abs(distanceFromWall), 2)));
+		return (int) Math.round(Math.sqrt(Math.pow(distanceFromImageXAxesPlane, 2) + Math.pow(Math.abs(distanceFromWallBuffer), 2)));
 	}
 
 	private int getDegreesToTurn(VectorF translation)
@@ -91,7 +81,7 @@ public class DefaultAutonomous extends LinearOpMode
 		double distanceFromPhoto = translation.get(0);
 		double distanceFromWall = translation.get(2);
 
-		return (int) Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
+		return (int) -Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
 	}
 
 	@Nullable
@@ -167,26 +157,43 @@ public class DefaultAutonomous extends LinearOpMode
 		}
 	}
 
-	private void turn(double power, int degrees)
+	private double getTurnPower(double power, double error)
 	{
+		double turnPower = power * error;
+
+		if (turnPower >= 0)
+		{
+			turnPower += robot.MINIMUM_SPEED;
+		}
+		else
+		{
+			turnPower -= robot.MINIMUM_SPEED;
+		}
+
+		return turnPower;
+	}
+
+	private double getTurnError(double target, double heading)
+	{
+		return ((target - heading) / 100) * robot.TURN_COEFFICIENT;
+	}
+
+	private void turn(double power, int angle)
+	{
+		double leftMotorPower;
+		double rightMotorPower;
+
 		robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 		robot.gyroSensor.resetZAxisIntegrator();
 
-		if (degrees > 0)
+		while (!isHeadingReached(angle) && opModeIsActive())
 		{
-			robot.leftMotor.setPower(power);
-			robot.rightMotor.setPower(-power);
-		}
-		else
-		{
-			robot.leftMotor.setPower(-power);
-			robot.rightMotor.setPower(power);
-		}
-
-		while (!isHeadingReached(degrees) && opModeIsActive())
-		{
+			leftMotorPower = -getTurnPower(power, getTurnError(angle, getAbsGyroHeading()));
+			rightMotorPower = getTurnPower(power, getTurnError(angle, getAbsGyroHeading()));
+			robot.leftMotor.setPower(leftMotorPower);
+			robot.rightMotor.setPower(rightMotorPower);
 			idle();
 			sleep(50);
 		}
@@ -194,15 +201,10 @@ public class DefaultAutonomous extends LinearOpMode
 		stopDriveMotors();
 	}
 
-	private boolean isHeadingReached(double heading)
+	private boolean isHeadingReached(int targetHeading)
 	{
-		if (heading > 0)
-		{
-			return (getAbsGyroHeading() >= heading);
-		}
-		else
-		{
-			return (getAbsGyroHeading() <= heading);
-		}
+		int headingError = targetHeading - getAbsGyroHeading();
+
+		return (Math.abs(headingError) <= robot.TURN_HEADING_THRESHOLD);
 	}
 }

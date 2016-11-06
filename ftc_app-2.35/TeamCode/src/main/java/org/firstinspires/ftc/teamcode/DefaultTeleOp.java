@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "TeleOp")
 public class DefaultTeleOp extends LinearOpMode
@@ -11,56 +12,81 @@ public class DefaultTeleOp extends LinearOpMode
 	@Override
 	public void runOpMode() throws InterruptedException
 	{
+		double DEFAULT_SPEED_COEFFICIENT = 1;
+		double SLOW_SPEED_COEFFICIENT = 0.25;
+		double DEAD_ZONE = 0.1;
+
+		double rightMotorSpeed;
+		double leftMotorSpeed;
+
+		robot.init(hardwareMap);
+
 		waitForStart();
+
+		robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 		while (opModeIsActive())
 		{
-			double right_speed;
-			double left_speed;
-
-			if (gamepad1.right_bumper)
+			if (Math.abs(gamepad1.right_stick_y) > DEAD_ZONE)
 			{
-				if (gamepad1.right_stick_y >= 0)
-				{
-					right_speed = 1;
-				}
-				else
-				{
-					right_speed = -1;
-				}
-
-				if (gamepad1.left_stick_y >= 0)
-				{
-					left_speed = 1;
-				}
-				else
-				{
-					left_speed = -1;
-				}
+				rightMotorSpeed = gamepad1.right_stick_y;
 			}
 			else
 			{
-				if (Math.abs(gamepad1.right_stick_y) <= 0.2)
-				{
-					right_speed = 0;
-				}
-				else
-				{
-					right_speed = gamepad1.right_stick_y * 0.75;
-				}
-
-				if (Math.abs(gamepad1.left_stick_y) <= 0.2)
-				{
-					left_speed = 0;
-				}
-				else
-				{
-					left_speed = gamepad1.left_stick_y * 0.75;
-				}
+				rightMotorSpeed = 0;
 			}
 
-			robot.rightMotor.setPower(right_speed);
-			robot.leftMotor.setPower(left_speed);
+			if (Math.abs(gamepad1.left_stick_y) > DEAD_ZONE)
+			{
+				leftMotorSpeed = gamepad1.left_stick_y;
+			}
+			else
+			{
+				leftMotorSpeed = 0;
+			}
+
+			if (gamepad2.right_bumper)
+			{
+				rightMotorSpeed = rightMotorSpeed * SLOW_SPEED_COEFFICIENT;
+				leftMotorSpeed = leftMotorSpeed * SLOW_SPEED_COEFFICIENT;
+			}
+			else
+			{
+				rightMotorSpeed = rightMotorSpeed * DEFAULT_SPEED_COEFFICIENT;
+				leftMotorSpeed = leftMotorSpeed * DEFAULT_SPEED_COEFFICIENT;
+			}
+
+			if (gamepad2.right_trigger > 0)
+			{
+				robot.ballDeployer.setPosition(0.75);
+			}
+			else
+			{
+				robot.ballDeployer.setPosition(1);
+			}
+
+
+			if (gamepad2.left_bumper)
+			{
+				robot.ballCollector.setPower(1);
+			}
+			else
+			{
+				robot.ballCollector.setPower(0);
+			}
+
+			if (gamepad2.left_trigger > 0)
+			{
+				robot.ballLauncher.setPower(1);
+			}
+			else
+			{
+				robot.ballLauncher.setPower(0);
+			}
+
+			robot.rightMotor.setPower(rightMotorSpeed);
+			robot.leftMotor.setPower(leftMotorSpeed);
 		}
 	}
 }
