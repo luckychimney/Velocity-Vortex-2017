@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
@@ -14,11 +15,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-@Autonomous(name = "Autonomous")
+@Autonomous(name = "Default Autonomous")
 @Disabled
 public class DefaultAutonomous extends LinearOpMode
 {
 	private Robot robot = new Robot();
+
+	private ElapsedTime elapsedTime = new ElapsedTime();
 
 	@Override
 	public void runOpMode() throws InterruptedException
@@ -29,7 +32,15 @@ public class DefaultAutonomous extends LinearOpMode
 
 		robot.init(hardwareMap);
 
-		while (robot.gyroSensor.isCalibrating() & opModeIsActive())
+		while (!robot.gyroSensor.isCalibrating())
+		{
+			telemetry.addData(">", "Waiting for gyro calibration...");
+			telemetry.update();
+			idle();
+			sleep(50);
+		}
+
+		while (robot.gyroSensor.isCalibrating() && opModeIsActive())
 		{
 			telemetry.addData(">", "Calibrating gyro...");
 			telemetry.update();
@@ -45,8 +56,7 @@ public class DefaultAutonomous extends LinearOpMode
 		telemetry.addData(">", "Robot running...");
 		telemetry.update();
 
-		drive(robot.DEFAULT_DRIVE_SPEED, 775);
-		sleep(1500);
+		drive(robot.DEFAULT_DRIVE_SPEED, 800);
 
 		while (getVuforiaTrackableTranslation(robot.beacons) == null && opModeIsActive())
 		{
@@ -55,8 +65,8 @@ public class DefaultAutonomous extends LinearOpMode
 		}
 
 		beaconTranslation = getVuforiaTrackableTranslation(robot.beacons);
-		distanceToDrive = getDistanceToDrive(beaconTranslation);
-		degreesToTurn = getDegreesToTurn(beaconTranslation);
+		distanceToDrive = getDistanceToDrive(beaconTranslation) / 4;
+		degreesToTurn = getDegreesToTurn(beaconTranslation) + 8;
 
 		telemetry.addData("Drive Distance", distanceToDrive);
 		telemetry.addData("Turn Degrees", degreesToTurn);
@@ -64,24 +74,26 @@ public class DefaultAutonomous extends LinearOpMode
 
 		turn(robot.DEFAULT_TURN_SPEED, degreesToTurn);
 		drive(robot.DEFAULT_DRIVE_SPEED, distanceToDrive);
-		turn(robot.DEFAULT_TURN_SPEED, -(90 + degreesToTurn));
-		drive(robot.DEFAULT_DRIVE_SPEED, 440);
+		//turn(robot.DEFAULT_TURN_SPEED, -(90 + degreesToTurn));
+		//drive(robot.DEFAULT_DRIVE_SPEED, 440);
+
 	}
 
 	private int getDistanceToDrive(VectorF translation)
 	{
 		double distanceFromImageXAxesPlane = translation.get(0);
-		double distanceFromWallBuffer = translation.get(2) - 450;
+		double distanceFromWallBuffer = translation.get(2) - robot.WALL_BUFFER;
 
 		return (int) Math.round(Math.sqrt(Math.pow(distanceFromImageXAxesPlane, 2) + Math.pow(Math.abs(distanceFromWallBuffer), 2)));
 	}
 
+	@SuppressWarnings("SuspiciousNameCombination")
 	private int getDegreesToTurn(VectorF translation)
 	{
-		double distanceFromPhoto = translation.get(0);
-		double distanceFromWall = translation.get(2);
+		double distanceFromImageXAxesPlane = translation.get(0);
+		double distanceFromWallBuffer = translation.get(2) - robot.WALL_BUFFER;
 
-		return (int) -Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromPhoto, distanceFromWall))) - 90);
+		return (int) -Math.round(Math.abs(Math.toDegrees(Math.atan2(distanceFromImageXAxesPlane, distanceFromWallBuffer))) - 90);
 	}
 
 	@Nullable
@@ -100,6 +112,25 @@ public class DefaultAutonomous extends LinearOpMode
 		return null;
 	}
 
+	private void timeDrive(double power, int time)
+	{
+		robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+		robot.leftMotor.setPower(power);
+		robot.rightMotor.setPower(power);
+
+		double startTime = elapsedTime.milliseconds();
+
+		while (startTime + time > elapsedTime.milliseconds())
+		{
+			sleep(50);
+			idle();
+		}
+
+		stopDriveMotors();
+	}
+
 	private void drive(double power, int distance)
 	{
 		double leftAdjustedPower;
@@ -112,29 +143,32 @@ public class DefaultAutonomous extends LinearOpMode
 
 		robot.gyroSensor.resetZAxisIntegrator();
 
-		while (Math.abs(robot.getEncoderWheel().getCurrentPosition()) < encoderUnitsToDrive && opModeIsActive())
+		if (distance < 0)
 		{
-			leftAdjustedPower = Range.clip(power - getPowerAdjustment(), 0, 1);
-			rightAdjustedPower = Range.clip(power + getPowerAdjustment(), 0, 1);
+			power = power*-1;
+		}
+
+		while((Math.abs(robot.getEncoderWheel().getCurrentPosition()) < Math.abs(encoderUnitsToDrive) && opModeIsActive()))
+		{
+			leftAdjustedPower = Range.clip(power - getPowerAdjustment(distance), -1, 1);
+			rightAdjustedPower = Range.clip(power + getPowerAdjustment(distance), -1, 1);
 			robot.leftMotor.setPower(leftAdjustedPower);
 			robot.rightMotor.setPower(rightAdjustedPower);
 			idle();
 			sleep(50);
+
+			telemetry.addData("Angle", getAbsGyroHeading());
+			telemetry.addData("Adjusted Power", getPowerAdjustment(distance));
+			telemetry.addData("Encoder", robot.getEncoderWheel().getCurrentPosition());
+			telemetry.update();
 		}
 
 		stopDriveMotors();
 	}
 
-	private double getPowerAdjustment()
+	private double getPowerAdjustment(int distance)
 	{
-		if (robot.rightMotor.getPower() > 0)
-		{
-			return (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
-		}
-		else
-		{
-			return -(getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
-		}
+		return (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
 	}
 
 	private void stopDriveMotors()
@@ -158,32 +192,28 @@ public class DefaultAutonomous extends LinearOpMode
 		}
 	}
 
-	private double getTurnPower(double power, double error)
+	private double getTurnError(double target, double heading)
 	{
-		double turnPower = power * error;
+		return ((target - heading)/100) * robot.TURN_COEFFICIENT;
+	}
 
-		if (turnPower >= 0)
+	private double getTurnPower(double targetAngle, double heading, double power)
+	{
+		double powerAdjustment = 1 - (heading/targetAngle);
+		double adjustedPower = powerAdjustment*power;
+
+		if (targetAngle > 0)
 		{
-			turnPower += robot.MINIMUM_SPEED;
+			return Range.clip(adjustedPower, robot.MINIMUM_SPEED, power);
 		}
 		else
 		{
-			turnPower -= robot.MINIMUM_SPEED;
+			return Range.clip(-adjustedPower, -power, -robot.MINIMUM_SPEED);
 		}
-
-		return turnPower;
-	}
-
-	private double getTurnError(double target, double heading)
-	{
-		return ((target - heading) / 100) * robot.TURN_COEFFICIENT;
 	}
 
 	private void turn(double power, int angle)
 	{
-		double leftMotorPower;
-		double rightMotorPower;
-
 		robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -191,21 +221,27 @@ public class DefaultAutonomous extends LinearOpMode
 
 		while (!isHeadingReached(angle) && opModeIsActive())
 		{
-			leftMotorPower = -getTurnPower(power, getTurnError(angle, getAbsGyroHeading()));
-			rightMotorPower = getTurnPower(power, getTurnError(angle, getAbsGyroHeading()));
-			robot.leftMotor.setPower(leftMotorPower);
-			robot.rightMotor.setPower(rightMotorPower);
-			idle();
-			sleep(50);
+			robot.leftMotor.setPower(-getTurnPower(angle, getAbsGyroHeading(), power));
+			robot.rightMotor.setPower(getTurnPower(angle, getAbsGyroHeading(), power));
+
+			telemetry.addData("Gyro", getAbsGyroHeading());
+			telemetry.addData("left", getTurnPower(angle, getAbsGyroHeading(), power));
+			telemetry.addData("right", -getTurnPower(angle, getAbsGyroHeading(), power));
+			telemetry.update();
 		}
 
 		stopDriveMotors();
 	}
 
-	private boolean isHeadingReached(int targetHeading)
+	private boolean isHeadingReached(double heading)
 	{
-		int headingError = targetHeading - getAbsGyroHeading();
-
-		return (Math.abs(headingError) <= robot.TURN_HEADING_THRESHOLD);
+		if (heading > 0)
+		{
+			return (getAbsGyroHeading() >= heading);
+		}
+		else
+		{
+			return (getAbsGyroHeading() <= heading);
+		}
 	}
 }
