@@ -81,28 +81,6 @@ public class BlueAutonomous extends LinearOpMode
 		stopDriveMotors();
 	}
 
-	private void timeDrive(double power, int time)
-	{
-		if (opModeIsActive())
-		{
-			robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-			robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-			robot.leftMotor.setPower(power);
-			robot.rightMotor.setPower(power);
-
-			double startTime = elapsedTime.milliseconds();
-
-			while (startTime + time > elapsedTime.milliseconds() && opModeIsActive())
-			{
-				sleep(50);
-				idle();
-			}
-		}
-
-		stopDriveMotors();
-	}
-
 	private void turn(double power, int angle)
 	{
 		if (opModeIsActive())
@@ -127,6 +105,33 @@ public class BlueAutonomous extends LinearOpMode
 		stopDriveMotors();
 	}
 
+	private void timeDrive(double power, int time)
+	{
+		if (opModeIsActive())
+		{
+			robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+			robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+			robot.leftMotor.setPower(power);
+			robot.rightMotor.setPower(power);
+
+			double startTime = elapsedTime.milliseconds();
+
+			while (startTime + time > elapsedTime.milliseconds() && opModeIsActive())
+			{
+				sleep(50);
+				idle();
+			}
+		}
+
+		stopDriveMotors();
+	}
+
+	private double getPowerAdjustment()
+	{
+		return (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
+	}
+
 	private int getAbsGyroHeading()
 	{
 		if (robot.gyroSensor.getHeading() > 180)
@@ -136,6 +141,27 @@ public class BlueAutonomous extends LinearOpMode
 		else
 		{
 			return robot.gyroSensor.getHeading();
+		}
+	}
+
+	private void stopDriveMotors()
+	{
+		robot.leftMotor.setPower(0);
+		robot.rightMotor.setPower(0);
+
+		robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+	}
+
+	private boolean isHeadingReached(double heading)
+	{
+		if (heading > 0)
+		{
+			return (getAbsGyroHeading() >= heading);
+		}
+		else
+		{
+			return (getAbsGyroHeading() <= heading);
 		}
 	}
 
@@ -152,31 +178,5 @@ public class BlueAutonomous extends LinearOpMode
 		{
 			return Range.clip(-adjustedPower, -power, -robot.MINIMUM_SPEED);
 		}
-	}
-
-	private boolean isHeadingReached(double heading)
-	{
-		if (heading > 0)
-		{
-			return (getAbsGyroHeading() >= heading);
-		}
-		else
-		{
-			return (getAbsGyroHeading() <= heading);
-		}
-	}
-
-	private double getPowerAdjustment()
-	{
-		return (getAbsGyroHeading() * robot.GYRO_DRIVE_COEFFICIENT);
-	}
-
-	private void stopDriveMotors()
-	{
-		robot.leftMotor.setPower(0);
-		robot.rightMotor.setPower(0);
-
-		robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-		robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 	}
 }

@@ -1,16 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.vuforia.HINT;
-import com.vuforia.Vuforia;
-
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 public class Robot
 {
@@ -19,7 +12,6 @@ public class Robot
 	final double DEFAULT_DRIVE_SPEED = .75;
 	final double DEFAULT_TURN_SPEED = 0.6;
 	final double MINIMUM_SPEED = .27;
-	final int TURN_HEADING_THRESHOLD = 1;
 
 	final int WALL_BUFFER = 500;
 
@@ -33,8 +25,7 @@ public class Robot
 	DcMotor ballCollector;
 	Servo ballDeployer;
 	GyroSensor gyroSensor;
-	private ColorSensor colorSensor;
-	VuforiaTrackables beacons;
+//	VuforiaTrackables beacons;
 
 	public void init(HardwareMap hardwareMap)
 	{
@@ -59,21 +50,19 @@ public class Robot
 		ballDeployer.setDirection(Servo.Direction.FORWARD);
 		ballDeployer.setPosition(1);
 
-		VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
-		parameters.vuforiaLicenseKey = "AVjSL4f/////AAAAGRrqOmjjwUvcra1uL+pn/W8AoLn03Yj7g6Aw+VGRAI+CkzXWFw/7FLW09TYRSzxCcQmlWovvlsq9k4DqqxDr+bnAVhsmk+MNEzKyMBqkwMM6BGjEL6ohtkGbMiE+sYL0aWgZ+ULu6pPJZQboiH/sEcH2jq8o5zAVe3lbP9E34gCELlHAIzgEta7lXabdjC86OixIDZbdEBpE5UTGPRFKTbYgKFVNoouFgUT4hs5MiqD21DwbubgmSe+WOVyi3G4WTkJowT9jx1XlOrUXwc6kfyArQ+DFQNXEghwAXhC9FOEWijQTKSG+TDq7XePfRICqLPEdl4aYUixHn6OCCPZ85o7bEaBYf74ZddKg7IBTCOsg";
-		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-		parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
-		Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 1);
-		VuforiaLocalizer vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+//		VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
+//		parameters.vuforiaLicenseKey = "AVjSL4f/////AAAAGRrqOmjjwUvcra1uL+pn/W8AoLn03Yj7g6Aw+VGRAI+CkzXWFw/7FLW09TYRSzxCcQmlWovvlsq9k4DqqxDr+bnAVhsmk+MNEzKyMBqkwMM6BGjEL6ohtkGbMiE+sYL0aWgZ+ULu6pPJZQboiH/sEcH2jq8o5zAVe3lbP9E34gCELlHAIzgEta7lXabdjC86OixIDZbdEBpE5UTGPRFKTbYgKFVNoouFgUT4hs5MiqD21DwbubgmSe+WOVyi3G4WTkJowT9jx1XlOrUXwc6kfyArQ+DFQNXEghwAXhC9FOEWijQTKSG+TDq7XePfRICqLPEdl4aYUixHn6OCCPZ85o7bEaBYf74ZddKg7IBTCOsg";
+//		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+//		parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
+//		Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 1);
+//		VuforiaLocalizer vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
-		beacons = vuforia.loadTrackablesFromAsset("FTC_2016-17");
-		beacons.get(0).setName("Wheels");
-		beacons.get(1).setName("Tools");
-		beacons.get(2).setName("Lego");
-		beacons.get(3).setName("Gears");
-		beacons.activate();
-
-		colorSensor = hardwareMap.colorSensor.get("color sensor");
+//		beacons = vuforia.loadTrackablesFromAsset("FTC_2016-17");
+//		beacons.get(0).setName("Wheels");
+//		beacons.get(1).setName("Tools");
+//		beacons.get(2).setName("Lego");
+//		beacons.get(3).setName("Gears");
+//		beacons.activate();
 
 		gyroSensor = hardwareMap.gyroSensor.get("gyro");
 		gyroSensor.calibrate();
