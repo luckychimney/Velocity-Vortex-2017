@@ -89,6 +89,7 @@ public class DefaultTeleOp extends LinearOpMode
 				robot.ballLauncher.setPower(0);
 			}
 
+			//TODO Fix this mess. The controls are literally flipped AND reversed
 			robot.rightMotor.setPower(-leftMotorSpeed);
 			robot.leftMotor.setPower(-rightMotorSpeed);
 		}
