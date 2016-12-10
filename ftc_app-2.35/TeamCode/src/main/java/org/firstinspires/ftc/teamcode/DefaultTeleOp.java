@@ -1,14 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "TeleOp")
-public class DefaultTeleOp extends LinearOpMode
+public class DefaultTeleOp extends Robot
 {
-	private Robot robot = new Robot();
-
 	@Override
 	public void runOpMode() throws InterruptedException
 	{
@@ -19,12 +16,12 @@ public class DefaultTeleOp extends LinearOpMode
 		double rightMotorSpeed;
 		double leftMotorSpeed;
 
-		robot.init(hardwareMap);
+		initRobot();
 
 		waitForStart();
 
-		robot.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		robot.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 		while (opModeIsActive())
 		{
@@ -59,39 +56,39 @@ public class DefaultTeleOp extends LinearOpMode
 
 			if (gamepad2.right_trigger > 0)
 			{
-				robot.ballDeployer.setPosition(0.75);
+				ballDeployer.setPosition(0.75);
 			}
 			else
 			{
-				robot.ballDeployer.setPosition(1);
+				ballDeployer.setPosition(1);
 			}
 
 
 			if (gamepad2.left_bumper)
 			{
-				robot.ballCollector.setPower(1);
+				ballCollector.setPower(1);
 			}
 			else if (gamepad2.right_bumper)
 			{
-				robot.ballCollector.setPower(-1);
+				ballCollector.setPower(-1);
 			}
 			else
 			{
-				robot.ballCollector.setPower(0);
+				ballCollector.setPower(0);
 			}
 
 			if (gamepad2.left_trigger > 0)
 			{
-				robot.ballLauncher.setPower(0.65);
+				ballLauncher.setPower(0.65);
 			}
 			else
 			{
-				robot.ballLauncher.setPower(0);
+				ballLauncher.setPower(0);
 			}
 
 			//TODO Fix this mess. The controls are literally flipped AND reversed
-			robot.rightMotor.setPower(-leftMotorSpeed);
-			robot.leftMotor.setPower(-rightMotorSpeed);
+			rightMotor.setPower(-leftMotorSpeed);
+			leftMotor.setPower(-rightMotorSpeed);
 		}
 	}
 }
