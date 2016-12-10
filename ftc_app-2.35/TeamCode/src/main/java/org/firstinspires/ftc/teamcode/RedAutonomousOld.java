@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@Autonomous(name = "Blue Autonomous")
-public class BlueAutonomous extends LinearOpMode
+@Autonomous(name = "Red Autonomous Old")
+public class RedAutonomousOld extends LinearOpMode
 {
 	private Robot robot = new Robot();
 
@@ -27,9 +27,6 @@ public class BlueAutonomous extends LinearOpMode
 		telemetry.update();
 
 		robot.ballLauncher.setPower(0.75);
-
-		drive(1, 304);
-
 		sleep(1500);
 		robot.ballDeployer.setPosition(.75);
 		sleep(1000);
@@ -41,8 +38,8 @@ public class BlueAutonomous extends LinearOpMode
 		sleep(1000);
 		robot.ballLauncher.setPower(0);
 
-		drive(1, 700); //subtracted 300
-		turn(.75, 175);
+		drive(1, 1000);
+		turn(.75, -135);
 		timeDrive(-1, 1000);
 	}
 
@@ -145,6 +142,15 @@ public class BlueAutonomous extends LinearOpMode
 		{
 			return robot.gyroSensor.getHeading();
 		}
+	}
+
+	private void stopDriveMotors()
+	{
+		robot.leftMotor.setPower(0);
+		robot.rightMotor.setPower(0);
+
+		robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 	}
 
 	private boolean isHeadingReached(double heading)

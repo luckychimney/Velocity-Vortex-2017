@@ -25,6 +25,7 @@ public class Robot
 	DcMotor ballCollector;
 	Servo ballDeployer;
 	GyroSensor gyroSensor;
+
 //	VuforiaTrackables beacons;
 
 	public void init(HardwareMap hardwareMap)

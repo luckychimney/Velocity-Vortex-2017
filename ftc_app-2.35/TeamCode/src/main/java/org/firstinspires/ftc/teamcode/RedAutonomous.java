@@ -26,7 +26,10 @@ public class RedAutonomous extends LinearOpMode
 		telemetry.addData(">", "Robot running...");
 		telemetry.update();
 
-		robot.ballLauncher.setPower(0.7);
+		robot.ballLauncher.setPower(0.75);
+
+		drive(1, 304);
+
 		sleep(1500);
 		robot.ballDeployer.setPosition(.75);
 		sleep(1000);
@@ -38,7 +41,7 @@ public class RedAutonomous extends LinearOpMode
 		sleep(1000);
 		robot.ballLauncher.setPower(0);
 
-		drive(1, 1000);
+		drive(1, 700); //subtracted 300
 		turn(.75, -135);
 		timeDrive(-1, 1000);
 	}
