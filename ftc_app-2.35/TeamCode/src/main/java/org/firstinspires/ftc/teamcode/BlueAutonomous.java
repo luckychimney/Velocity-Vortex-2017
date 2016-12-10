@@ -22,9 +22,8 @@ public class BlueAutonomous extends Robot
 
 		waitForStart();
 
-		if(opModeIsActive())
+		if (opModeIsActive())
 		{
-
 			telemetry.addData(">", "Robot running...");
 			telemetry.update();
 
