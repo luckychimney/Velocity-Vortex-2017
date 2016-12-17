@@ -2,19 +2,20 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Simple Forward Drive")
-public class simpleForwardDrive extends Robot
+@Autonomous
+public class squareDrive extends Robot
 {
 	@Override
 	public void runOpMode() throws InterruptedException
 	{
 		initializeRobot();
-		sleep(1000);
 		waitForGyroCalibration();
 		waitForStart();
-		if(opModeIsActive())
+
+		for (int i = 0; i < 4; i++)
 		{
-			drive(1, 9999);
+			drive(DEFAULT_DRIVE_SPEED, 500);
+			turn(DEFAULT_TURN_SPEED, 90);
 		}
 	}
 }

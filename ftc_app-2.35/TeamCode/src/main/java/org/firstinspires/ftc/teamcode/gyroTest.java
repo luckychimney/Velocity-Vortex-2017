@@ -2,19 +2,20 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Simple Forward Drive")
-public class simpleForwardDrive extends Robot
+@Autonomous
+public class gyroTest extends Robot
 {
 	@Override
 	public void runOpMode() throws InterruptedException
 	{
 		initializeRobot();
-		sleep(1000);
 		waitForGyroCalibration();
 		waitForStart();
-		if(opModeIsActive())
+		while (opModeIsActive())
 		{
-			drive(1, 9999);
+			telemetry.addData("Abs Gyro", getAbsGyroHeading());
+			telemetry.addData("Gyro", gyroSensor.getHeading());
+			telemetry.update();
 		}
 	}
 }

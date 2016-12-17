@@ -16,7 +16,7 @@ public class DefaultTeleOp extends Robot
 		double rightMotorSpeed;
 		double leftMotorSpeed;
 
-		initRobot();
+		initializeRobot();
 
 		waitForStart();
 

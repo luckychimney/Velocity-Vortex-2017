@@ -9,17 +9,8 @@ import com.qualcomm.robotcore.util.Range;
 
 abstract public class Robot extends LinearOpMode
 {
-	final double GYRO_DRIVE_COEFFICIENT = 0.015;
-	//final double TURN_COEFFICIENT = 0.15;
-	//final double DEFAULT_DRIVE_SPEED = .75;
-	//final double DEFAULT_TURN_SPEED = 0.6;
-	final double MINIMUM_SPEED = .27;
-
-	//final int WALL_BUFFER = 500;
-
-	private final int ENCODER_UNITS_PER_REVOLUTION = 1440;
-	private final double ENCODER_WHEEL_DIAMETER = 50.2;
-	final double ENCODER_UNITS_PER_MILLIMETER = (ENCODER_UNITS_PER_REVOLUTION / (ENCODER_WHEEL_DIAMETER * Math.PI));
+	final double DEFAULT_DRIVE_SPEED = 1.0;
+	final double DEFAULT_TURN_SPEED = 0.75;
 
 	DcMotor leftMotor;
 	DcMotor rightMotor;
@@ -27,11 +18,15 @@ abstract public class Robot extends LinearOpMode
 	DcMotor ballCollector;
 	Servo ballDeployer;
 	GyroSensor gyroSensor;
+
+	private int lastRawGyroHeading = 0;
+	private int absGyroHeading = 0;
+	private int targetGyroHeading = 0;
 	private ElapsedTime elapsedTime = new ElapsedTime();
 
 //	VuforiaTrackables beacons;
 
-	void initRobot()
+	void initializeRobot()
 	{
 		leftMotor = hardwareMap.dcMotor.get("left motor");
 		leftMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -43,7 +38,8 @@ abstract public class Robot extends LinearOpMode
 
 		ballLauncher = hardwareMap.dcMotor.get("ball launcher");
 		ballLauncher.setDirection(DcMotor.Direction.REVERSE);
-		ballLauncher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		ballLauncher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		ballLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 		ballLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
 		ballCollector = hardwareMap.dcMotor.get("ball collector");
@@ -55,7 +51,9 @@ abstract public class Robot extends LinearOpMode
 		ballDeployer.setPosition(1);
 
 //		VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
-//		parameters.vuforiaLicenseKey = "AVjSL4f/////AAAAGRrqOmjjwUvcra1uL+pn/W8AoLn03Yj7g6Aw+VGRAI+CkzXWFw/7FLW09TYRSzxCcQmlWovvlsq9k4DqqxDr+bnAVhsmk+MNEzKyMBqkwMM6BGjEL6ohtkGbMiE+sYL0aWgZ+ULu6pPJZQboiH/sEcH2jq8o5zAVe3lbP9E34gCELlHAIzgEta7lXabdjC86OixIDZbdEBpE5UTGPRFKTbYgKFVNoouFgUT4hs5MiqD21DwbubgmSe+WOVyi3G4WTkJowT9jx1XlOrUXwc6kfyArQ+DFQNXEghwAXhC9FOEWijQTKSG+TDq7XePfRICqLPEdl4aYUixHn6OCCPZ85o7bEaBYf74ZddKg7IBTCOsg";
+//		parameters.vuforiaLicenseKey = "AVjSL4f/////AAAAGRrqOmjjwUvcra1uL+pn/W8AoLn03Yj7g6Aw+VGRAI+CkzXWFw/7FLW09TYRSzxCcQmlWovvlsq9k4DqqxDr+bnAVhsmk+MNEzKyMBqkwMM6BGjEL6ohtkGbMiE+sYL0aWgZ+UL
+// u6pPJZQboiH/sEcH2jq8o5zAVe3lbP9E34gCELlHAIzgEta7lXabdjC86OixIDZbdEBpE5UTGPRFKTbYgKFVNoouFgUT4hs5MiqD21DwbubgmSe+WOVyi3G4WTkJowT9jx1XlOrUXwc6kfyArQ+DFQNXEghwAXhC9FOEWijQTKSG+TDq7XePfRICqLPE
+// dl4aYUixHn6OCCPZ85o7bEaBYf74ZddKg7IBTCOsg";
 //		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
 //		parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
 //		Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 1);
@@ -72,8 +70,13 @@ abstract public class Robot extends LinearOpMode
 		gyroSensor.calibrate();
 	}
 
-	void drive(int power, int distance)
+	void drive(double power, int distance)
 	{
+		final int encoderUnitsPerRevolution = 1440;
+		final double encoderWheelDiameter = 50.2;
+		final double encoderUnitsPerMillimeter = (encoderUnitsPerRevolution / (encoderWheelDiameter * Math.PI));
+		final double driveStartTime = elapsedTime.seconds();
+
 		double leftAdjustedPower;
 		double rightAdjustedPower;
 
@@ -82,7 +85,7 @@ abstract public class Robot extends LinearOpMode
 			leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 			rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-			double encoderUnitsToDrive = ENCODER_UNITS_PER_MILLIMETER * distance;
+			double encoderUnitsToDrive = encoderUnitsPerMillimeter * distance;
 
 			gyroSensor.resetZAxisIntegrator();
 
@@ -91,7 +94,7 @@ abstract public class Robot extends LinearOpMode
 				power = power * -1;
 			}
 
-			while ((Math.abs(getEncoderWheel().getCurrentPosition()) < Math.abs(encoderUnitsToDrive) && opModeIsActive()) && gyroSensor.rawX() < 350)
+			while ((Math.abs(getEncoderWheel().getCurrentPosition()) < Math.abs(encoderUnitsToDrive) && opModeIsActive()))
 			{
 				leftAdjustedPower = Range.clip(power - getPowerAdjustment(), -1, 1);
 				rightAdjustedPower = Range.clip(power + getPowerAdjustment(), -1, 1);
@@ -101,6 +104,8 @@ abstract public class Robot extends LinearOpMode
 				sleep(50);
 
 				telemetry.addData("Angle", getAbsGyroHeading());
+				telemetry.addData("Target", targetGyroHeading);
+
 				telemetry.addData("Adjusted Power", getPowerAdjustment());
 				telemetry.addData("Encoder", getEncoderWheel().getCurrentPosition());
 				telemetry.update();
@@ -110,35 +115,38 @@ abstract public class Robot extends LinearOpMode
 		stopDriveMotors();
 	}
 
-	DcMotor getEncoderWheel()
+	private DcMotor getEncoderWheel()
 	{
 		return rightMotor;
 	}
 
-
-
 	private double getPowerAdjustment()
 	{
-		return (getAbsGyroHeading() * GYRO_DRIVE_COEFFICIENT);
+		final double GYRO_DRIVE_COEFFICIENT = 0.015;
+
+		return (targetGyroHeading - getAbsGyroHeading()) * GYRO_DRIVE_COEFFICIENT;
 	}
 
-	void launchBall(int delay)
+	double getAbsGyroHeading()
 	{
-		liftBallDeployer();
-		sleep(delay);
-		dropBallDeployer();
-	}
-
-	private int getAbsGyroHeading()
-	{
-		if (gyroSensor.getHeading() > 180)
+		int gyroHeading = gyroSensor.getHeading();
+		//359<-0
+		if (gyroHeading - 180 > lastRawGyroHeading)
 		{
-			return gyroSensor.getHeading() - 360;
+			absGyroHeading = absGyroHeading + gyroHeading - 360 - lastRawGyroHeading;
+		}
+		//359->0
+		else if (gyroHeading + 180 < lastRawGyroHeading)
+		{
+			absGyroHeading = absGyroHeading + gyroHeading + 360 - lastRawGyroHeading;
 		}
 		else
 		{
-			return gyroSensor.getHeading();
+			absGyroHeading = absGyroHeading + gyroHeading - lastRawGyroHeading;
 		}
+
+		lastRawGyroHeading = gyroHeading;
+		return absGyroHeading;
 	}
 
 	private void stopDriveMotors()
@@ -150,23 +158,43 @@ abstract public class Robot extends LinearOpMode
 		rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 	}
 
-	void liftBallDeployer()
+	private boolean isTiltDetected(double driveStartTime)
 	{
-		ballDeployer.setPosition(.75);
+		return (elapsedTime.seconds() > driveStartTime + 2 && gyroSensor.rawX() > 1000);
 	}
 
-	void dropBallDeployer()
+	void launchBall(int delay)
+	{
+		liftBallDeployer();
+		sleep(delay);
+		dropBallDeployer();
+	}
+
+	private void liftBallDeployer()
+	{
+		ballDeployer.setPosition(.65);
+	}
+
+	private void dropBallDeployer()
 	{
 		ballDeployer.setPosition(1);
 	}
 
 	void waitForGyroCalibration()
 	{
-		while(gyroSensor.isCalibrating())
+		telemetry.addData(">", "Calibrating gyro...");
+		telemetry.update();
+
+		sleep(1000);
+
+		while (gyroSensor.isCalibrating() && !isStopRequested())
 		{
 			idle();
 			sleep(50);
 		}
+
+		telemetry.addData(">", "Robot ready!");
+		telemetry.update();
 	}
 
 	void turn(double power, int angle)
@@ -176,7 +204,7 @@ abstract public class Robot extends LinearOpMode
 			leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 			rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-			gyroSensor.resetZAxisIntegrator();
+			targetGyroHeading += angle;
 
 			while (!isHeadingReached(angle) && opModeIsActive())
 			{
@@ -184,6 +212,7 @@ abstract public class Robot extends LinearOpMode
 				rightMotor.setPower(getTurnPower(angle, getAbsGyroHeading(), power));
 
 				telemetry.addData("Gyro", getAbsGyroHeading());
+				telemetry.addData("Target", targetGyroHeading);
 				telemetry.addData("left", getTurnPower(angle, getAbsGyroHeading(), power));
 				telemetry.addData("right", -getTurnPower(angle, getAbsGyroHeading(), power));
 				telemetry.update();
@@ -197,17 +226,19 @@ abstract public class Robot extends LinearOpMode
 	{
 		if (heading > 0)
 		{
-			return (getAbsGyroHeading() >= heading);
+			return (getAbsGyroHeading() > targetGyroHeading);
 		}
 		else
 		{
-			return (getAbsGyroHeading() <= heading);
+			return (getAbsGyroHeading() < targetGyroHeading);
 		}
 	}
 
 	private double getTurnPower(double targetAngle, double heading, double power)
 	{
-		double powerAdjustment = 1 - (heading / targetAngle);
+		final double MINIMUM_SPEED = .27;
+
+		double powerAdjustment = 1 - Math.abs(heading / targetGyroHeading);
 		double adjustedPower = powerAdjustment * power;
 
 		if (targetAngle > 0)

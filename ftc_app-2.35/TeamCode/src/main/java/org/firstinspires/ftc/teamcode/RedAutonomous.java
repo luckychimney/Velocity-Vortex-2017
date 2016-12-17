@@ -2,24 +2,14 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Red Autonomous")
+@Autonomous(name = "Red Autonomous 1")
 public class RedAutonomous extends Robot
 {
 	@Override
 	public void runOpMode() throws InterruptedException
 	{
-		initRobot();
-
-		telemetry.addData(">", "Calibrating gyro...");
-		telemetry.update();
-
-		sleep(1000);
-
+		initializeRobot();
 		waitForGyroCalibration();
-
-		telemetry.addData(">", "Robot ready!");
-		telemetry.update();
-
 		waitForStart();
 
 		if (opModeIsActive())
@@ -27,9 +17,9 @@ public class RedAutonomous extends Robot
 			telemetry.addData(">", "Robot running...");
 			telemetry.update();
 
-			ballLauncher.setPower(0.75);
+			ballLauncher.setPower(0.45);
 
-			drive(1, 304);
+			drive(DEFAULT_DRIVE_SPEED, 304);
 
 			sleep(1500);
 			launchBall(1000);
@@ -39,9 +29,9 @@ public class RedAutonomous extends Robot
 
 			ballLauncher.setPower(0);
 
-			drive(1, 700);
-			turn(.75, -135);
-			timeDrive(-1, 1000);
+			drive(DEFAULT_DRIVE_SPEED, 700);
+			turn(DEFAULT_TURN_SPEED, -135);
+			timeDrive(-DEFAULT_DRIVE_SPEED, 1000);
 		}
 	}
 }

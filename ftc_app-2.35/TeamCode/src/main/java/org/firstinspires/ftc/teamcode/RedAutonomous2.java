@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Blue Autonomous 1")
-public class BlueAutonomous extends Robot
+@Autonomous(name = "Red Autonomous 2 ")
+public class RedAutonomous2 extends Robot
 {
 	@Override
 	public void runOpMode() throws InterruptedException
@@ -17,7 +17,7 @@ public class BlueAutonomous extends Robot
 			telemetry.addData(">", "Robot running...");
 			telemetry.update();
 
-			ballLauncher.setPower(0.45);
+			ballLauncher.setPower(0.75);
 
 			drive(DEFAULT_DRIVE_SPEED, 304);
 
@@ -29,9 +29,8 @@ public class BlueAutonomous extends Robot
 
 			ballLauncher.setPower(0);
 
-			drive(DEFAULT_DRIVE_SPEED, 700);
-			turn(DEFAULT_TURN_SPEED, 175);
-			timeDrive(-DEFAULT_DRIVE_SPEED, 1000);
+			drive(DEFAULT_DRIVE_SPEED, 900);
+
 		}
 	}
 }
