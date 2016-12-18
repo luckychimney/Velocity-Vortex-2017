@@ -9,12 +9,11 @@ public class simpleForwardDrive extends Robot
 	public void runOpMode() throws InterruptedException
 	{
 		initializeRobot();
-		sleep(1000);
 		waitForGyroCalibration();
 		waitForStart();
 		if(opModeIsActive())
 		{
-			drive(1, 9999);
+			drive(.15, 9999);
 		}
 	}
 }

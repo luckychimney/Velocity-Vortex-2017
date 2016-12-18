@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -16,6 +17,8 @@ abstract public class Robot extends LinearOpMode
 	DcMotor rightMotor;
 	DcMotor ballLauncher;
 	DcMotor ballCollector;
+	OpticalDistanceSensor leftOpticalDistanceSensor;
+	OpticalDistanceSensor rightOpticalDistanceSensor;
 	Servo ballDeployer;
 	GyroSensor gyroSensor;
 
@@ -23,8 +26,6 @@ abstract public class Robot extends LinearOpMode
 	private int absGyroHeading = 0;
 	private int targetGyroHeading = 0;
 	private ElapsedTime elapsedTime = new ElapsedTime();
-
-//	VuforiaTrackables beacons;
 
 	void initializeRobot()
 	{
@@ -36,7 +37,7 @@ abstract public class Robot extends LinearOpMode
 		rightMotor.setDirection(DcMotor.Direction.FORWARD);
 		rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-		ballLauncher = hardwareMap.dcMotor.get("ball launcher");
+		/*ballLauncher = hardwareMap.dcMotor.get("ball launcher");
 		ballLauncher.setDirection(DcMotor.Direction.REVERSE);
 		ballLauncher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 		ballLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -48,23 +49,13 @@ abstract public class Robot extends LinearOpMode
 
 		ballDeployer = hardwareMap.servo.get("ball deployer");
 		ballDeployer.setDirection(Servo.Direction.FORWARD);
-		ballDeployer.setPosition(1);
+		ballDeployer.setPosition(1);*/
 
-//		VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
-//		parameters.vuforiaLicenseKey = "AVjSL4f/////AAAAGRrqOmjjwUvcra1uL+pn/W8AoLn03Yj7g6Aw+VGRAI+CkzXWFw/7FLW09TYRSzxCcQmlWovvlsq9k4DqqxDr+bnAVhsmk+MNEzKyMBqkwMM6BGjEL6ohtkGbMiE+sYL0aWgZ+UL
-// u6pPJZQboiH/sEcH2jq8o5zAVe3lbP9E34gCELlHAIzgEta7lXabdjC86OixIDZbdEBpE5UTGPRFKTbYgKFVNoouFgUT4hs5MiqD21DwbubgmSe+WOVyi3G4WTkJowT9jx1XlOrUXwc6kfyArQ+DFQNXEghwAXhC9FOEWijQTKSG+TDq7XePfRICqLPE
-// dl4aYUixHn6OCCPZ85o7bEaBYf74ZddKg7IBTCOsg";
-//		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-//		parameters.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
-//		Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 1);
-//		VuforiaLocalizer vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+		//TODO Add these back
 
-//		beacons = vuforia.loadTrackablesFromAsset("FTC_2016-17");
-//		beacons.get(0).setName("Wheels");
-//		beacons.get(1).setName("Tools");
-//		beacons.get(2).setName("Lego");
-//		beacons.get(3).setName("Gears");
-//		beacons.activate();
+		leftOpticalDistanceSensor = hardwareMap.opticalDistanceSensor.get("left ODS");
+
+		rightOpticalDistanceSensor = hardwareMap.opticalDistanceSensor.get("right ODS");
 
 		gyroSensor = hardwareMap.gyroSensor.get("gyro");
 		gyroSensor.calibrate();
@@ -75,7 +66,7 @@ abstract public class Robot extends LinearOpMode
 		final int encoderUnitsPerRevolution = 1440;
 		final double encoderWheelDiameter = 50.2;
 		final double encoderUnitsPerMillimeter = (encoderUnitsPerRevolution / (encoderWheelDiameter * Math.PI));
-		final double driveStartTime = elapsedTime.seconds();
+		//final double driveStartTime = elapsedTime.seconds();
 
 		double leftAdjustedPower;
 		double rightAdjustedPower;
@@ -87,8 +78,6 @@ abstract public class Robot extends LinearOpMode
 
 			double encoderUnitsToDrive = encoderUnitsPerMillimeter * distance;
 
-			gyroSensor.resetZAxisIntegrator();
-
 			if (distance < 0)
 			{
 				power = power * -1;
@@ -96,8 +85,9 @@ abstract public class Robot extends LinearOpMode
 
 			while ((Math.abs(getEncoderWheel().getCurrentPosition()) < Math.abs(encoderUnitsToDrive) && opModeIsActive()))
 			{
-				leftAdjustedPower = Range.clip(power - getPowerAdjustment(), -1, 1);
-				rightAdjustedPower = Range.clip(power + getPowerAdjustment(), -1, 1);
+				//TODO Chnage the power adjustment back to gyor
+				leftAdjustedPower = Range.clip(power - getOpticalDistanceSensorPowerAdjustment(), -1, 1);
+				rightAdjustedPower = Range.clip(power + getOpticalDistanceSensorPowerAdjustment(), -1, 1);
 				leftMotor.setPower(leftAdjustedPower);
 				rightMotor.setPower(rightAdjustedPower);
 				idle();
@@ -106,7 +96,7 @@ abstract public class Robot extends LinearOpMode
 				telemetry.addData("Angle", getAbsGyroHeading());
 				telemetry.addData("Target", targetGyroHeading);
 
-				telemetry.addData("Adjusted Power", getPowerAdjustment());
+				telemetry.addData("Adjusted Power", getGyroPowerAdjustment());
 				telemetry.addData("Encoder", getEncoderWheel().getCurrentPosition());
 				telemetry.update();
 			}
@@ -120,11 +110,11 @@ abstract public class Robot extends LinearOpMode
 		return rightMotor;
 	}
 
-	private double getPowerAdjustment()
+	double getOpticalDistanceSensorPowerAdjustment()
 	{
-		final double GYRO_DRIVE_COEFFICIENT = 0.015;
+		final double opticalDistanceSensorCoefficient = .4;
 
-		return (targetGyroHeading - getAbsGyroHeading()) * GYRO_DRIVE_COEFFICIENT;
+		return (leftOpticalDistanceSensor.getLightDetected() - rightOpticalDistanceSensor.getLightDetected()) * opticalDistanceSensorCoefficient;
 	}
 
 	double getAbsGyroHeading()
@@ -149,6 +139,13 @@ abstract public class Robot extends LinearOpMode
 		return absGyroHeading;
 	}
 
+	double getGyroPowerAdjustment()
+	{
+		final double gyroDriveCoefficient = 0.015;
+
+		return (getAbsGyroHeading() - targetGyroHeading) * gyroDriveCoefficient;
+	}
+
 	private void stopDriveMotors()
 	{
 		leftMotor.setPower(0);
@@ -158,10 +155,37 @@ abstract public class Robot extends LinearOpMode
 		rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 	}
 
-	private boolean isTiltDetected(double driveStartTime)
+	double getCombinedPowerAdjustment()
+	{
+		double adjustment;
+
+		adjustment = Math.sqrt(Math.pow(getGyroPowerAdjustment(), 2) + Math.pow(getOpticalDistanceSensorPowerAdjustment(), 2));
+
+		if (getGyroPowerAdjustment() > 0)
+		{
+			return adjustment;
+		}
+		else if (getGyroPowerAdjustment() < 0)
+		{
+			return -adjustment;
+		}
+		else
+		{
+			if (getGyroPowerAdjustment() >= 0)
+			{
+				return adjustment;
+			}
+			else
+			{
+				return -adjustment;
+			}
+		}
+	}
+
+	/*private boolean isTiltDetected(double driveStartTime)
 	{
 		return (elapsedTime.seconds() > driveStartTime + 2 && gyroSensor.rawX() > 1000);
-	}
+	}*/
 
 	void launchBall(int delay)
 	{
@@ -236,18 +260,18 @@ abstract public class Robot extends LinearOpMode
 
 	private double getTurnPower(double targetAngle, double heading, double power)
 	{
-		final double MINIMUM_SPEED = .27;
+		final double minimumSpeed = .27;
 
 		double powerAdjustment = 1 - Math.abs(heading / targetGyroHeading);
 		double adjustedPower = powerAdjustment * power;
 
-		if (targetAngle > 0)
+		if (targetAngle - heading > 0)
 		{
-			return Range.clip(adjustedPower, MINIMUM_SPEED, power);
+			return Range.clip(adjustedPower, minimumSpeed, power);
 		}
 		else
 		{
-			return Range.clip(-adjustedPower, -power, -MINIMUM_SPEED);
+			return Range.clip(-adjustedPower, -power, -minimumSpeed);
 		}
 	}
 
