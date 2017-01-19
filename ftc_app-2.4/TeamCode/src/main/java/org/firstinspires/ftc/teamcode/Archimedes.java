@@ -244,12 +244,11 @@ abstract class Archimedes extends LinearOpMode
 	private double getDrivePower(double driveDistance, double power)
 	{
 		final double MINIMUM_DRIVE_POWER = .15;
-		final double EXPONENT_MULTIPLIER = 1;
 
-		double adjustedPower = Math.pow
-				(MINIMUM_DRIVE_POWER,
-						(Math.abs(getEncoderWheel().getCurrentPosition()) /
-						Math.abs(driveDistance)) * EXPONENT_MULTIPLIER);
+		double adjustedPower = ((1 - MINIMUM_DRIVE_POWER) - (1 - power)) *
+				Math.pow(Math.abs(
+						getEncoderWheel().getCurrentPosition() / driveDistance),
+						2) + MINIMUM_DRIVE_POWER;
 
 		if (driveDistance > 0)
 		{
@@ -450,12 +449,11 @@ abstract class Archimedes extends LinearOpMode
 	private double getTurnPower(double angleChange, double power)
 	{
 		final double MINIMUM_TURN_POWER = .35;
-		final double EXPONENT_MULTIPLIER = 1.25;
 
-		double adjustedPower =
-				Math.pow(MINIMUM_TURN_POWER, (1 - Math
-						.abs(targetGyroHeading_ - getGyroHeading()) /
-						Math.abs(angleChange)) * EXPONENT_MULTIPLIER);
+		double adjustedPower = ((1 - MINIMUM_TURN_POWER) - (1 - power)) *
+				Math.pow(1 - (Math.abs(
+						targetGyroHeading_ - getGyroHeading() / angleChange)),
+						2) + MINIMUM_TURN_POWER;
 
 		if (angleChange > 0)
 		{

@@ -35,7 +35,7 @@ public class RedAutonomous1 extends Archimedes
 			// Follow the line up to the beacon, detect the color and press
 			// the right button.
 			turnButtonPusherLeft();
-			followBeaconLineToWall(0.25, 300, 10);
+			followBeaconLineToWall(0.2, 300, 10);
 			sleep(500);
 			if(isDetectingRedOnRight())
 				turnButtonPusherRight();
