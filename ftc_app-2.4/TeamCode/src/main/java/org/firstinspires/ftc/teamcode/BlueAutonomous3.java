@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Red Autonomous 2")
-public class RedAutonomous2 extends Archimedes
+@Autonomous(name = "Blue Autonomous 3")
+public class BlueAutonomous3 extends Archimedes
 {
 	@Override
 	public void runOpMode() throws InterruptedException
@@ -18,7 +18,7 @@ public class RedAutonomous2 extends Archimedes
 			telemetry.update();
 
 			ballLauncher.setPower(0.55);
-			drive(DEFAULT_DRIVE_SPEED, 304);
+			drive(DEFAULT_DRIVE_SPEED, 500);
 			sleep(1500);
 			launchBall(1000);
 			sleep(1500);
@@ -27,7 +27,7 @@ public class RedAutonomous2 extends Archimedes
 			ballLauncher.setPower(0);
 
 			drive(DEFAULT_DRIVE_SPEED, 600);
-			turn(0.75, -135);
+			turn(0.75, 175);
 			timeDrive(-DEFAULT_DRIVE_SPEED, 1000);
 		}
 	}

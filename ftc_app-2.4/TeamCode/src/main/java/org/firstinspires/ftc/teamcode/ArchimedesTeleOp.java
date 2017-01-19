@@ -1,10 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name = "TeleOp")
-public class DefaultTeleOp extends Robot
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
+public class ArchimedesTeleOp extends Archimedes
 {
 	@Override
 	public void runOpMode() throws InterruptedException
@@ -16,8 +15,9 @@ public class DefaultTeleOp extends Robot
 		double rightMotorSpeed;
 		double leftMotorSpeed;
 
-		initializeRobot();
+		boolean isDriveControlsReversed = false;
 
+		initializeArchimedes();
 		waitForStart();
 
 		rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -25,6 +25,10 @@ public class DefaultTeleOp extends Robot
 
 		while (opModeIsActive())
 		{
+			/*
+			* Driver
+			 */
+
 			if (Math.abs(gamepad1.right_stick_y) > DEAD_ZONE)
 			{
 				rightMotorSpeed = gamepad1.right_stick_y;
@@ -54,15 +58,35 @@ public class DefaultTeleOp extends Robot
 				leftMotorSpeed = leftMotorSpeed * DEFAULT_SPEED_COEFFICIENT;
 			}
 
+			if (gamepad1.start)
+			{
+				isDriveControlsReversed = !isDriveControlsReversed;
+				while (gamepad1.start)
+				{
+					idle();
+				}
+			}
+			/*
+			* Gunner
+			 */
+
 			if (gamepad2.right_trigger > 0)
 			{
-				ballDeployer.setPosition(0.75);
+				liftBallDeployer();
 			}
 			else
 			{
-				ballDeployer.setPosition(1);
+				dropBallDeployer();
 			}
 
+			if (gamepad2.left_trigger > 0)
+			{
+				ballLauncher.setPower(0.75);
+			}
+			else
+			{
+				ballLauncher.setPower(0);
+			}
 
 			if (gamepad2.left_bumper)
 			{
@@ -77,18 +101,51 @@ public class DefaultTeleOp extends Robot
 				ballCollector.setPower(0);
 			}
 
-			if (gamepad2.left_trigger > 0)
+			if (gamepad2.dpad_up)
 			{
-				ballLauncher.setPower(0.65);
+				liftCapBallGrabber();
+			}
+
+			if (gamepad2.dpad_left || gamepad2.dpad_right)
+			{
+				clampCapBallGrabber();
+			}
+
+			if (gamepad2.dpad_down)
+			{
+				dropCapBallGrabber();
+			}
+
+			if (gamepad2.b)
+			{
+				turnButtonPusherRight();
+			}
+
+			if (gamepad2.x)
+			{
+				turnButtonPusherLeft();
+			}
+
+			if (gamepad2.a || gamepad2.y)
+			{
+				setButtonPusherToNeutral();
+			}
+
+			liftMotor1.setPower(-gamepad2.right_stick_y);
+			liftMotor2.setPower(liftMotor1.getPower());
+
+			//FIXME The controls are literally flipped AND reversed
+
+			if (isDriveControlsReversed)
+			{
+				rightMotor.setPower(rightMotorSpeed);
+				leftMotor.setPower(leftMotorSpeed);
 			}
 			else
 			{
-				ballLauncher.setPower(0);
+				rightMotor.setPower(-leftMotorSpeed);
+				leftMotor.setPower(-rightMotorSpeed);
 			}
-
-			//TODO Fix this mess. The controls are literally flipped AND reversed
-			rightMotor.setPower(-leftMotorSpeed);
-			leftMotor.setPower(-rightMotorSpeed);
 		}
 	}
 }
