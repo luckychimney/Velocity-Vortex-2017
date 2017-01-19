@@ -24,10 +24,10 @@ abstract class Archimedes extends LinearOpMode
 
 	DcMotor leftMotor;
 	DcMotor rightMotor;
-	DcMotor ballLauncher;
-	DcMotor ballCollector;
-	DcMotor liftMotor1;
-	DcMotor liftMotor2;
+	private DcMotor ballLauncher_;
+	private DcMotor ballCollector_;
+	private DcMotor liftMotor1;
+	private DcMotor liftMotor2;
 
 	private Servo ballDeployer_;
 	private Servo capBallGrabber_;
@@ -44,6 +44,27 @@ abstract class Archimedes extends LinearOpMode
 	private int targetGyroHeading_ = 0;
 	private ElapsedTime elapsedTime_ = new ElapsedTime();
 
+	void setLiftPower(double power)
+	{
+		liftMotor1.setPower(-power);
+		liftMotor2.setPower(liftMotor1.getPower());
+	}
+
+	void startBallCollector()
+	{
+		ballCollector_.setPower(1);
+	}
+
+	void stopBallCollector()
+	{
+		ballCollector_.setPower(0);
+	}
+
+	void reverseBallCollector()
+	{
+		ballCollector_.setPower(-1);
+	}
+
 	void initializeArchimedes()
 	{
 		leftMotor = hardwareMap.dcMotor.get("left motor");
@@ -54,15 +75,15 @@ abstract class Archimedes extends LinearOpMode
 		rightMotor.setDirection(DcMotor.Direction.FORWARD);
 		rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-		ballLauncher = hardwareMap.dcMotor.get("ball launcher");
-		ballLauncher.setDirection(DcMotor.Direction.REVERSE);
-		ballLauncher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-		ballLauncher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		ballLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+		ballLauncher_ = hardwareMap.dcMotor.get("ball launcher");
+		ballLauncher_.setDirection(DcMotor.Direction.REVERSE);
+		ballLauncher_.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		ballLauncher_.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		ballLauncher_.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-		ballCollector = hardwareMap.dcMotor.get("ball collector");
-		ballCollector.setDirection(DcMotor.Direction.REVERSE);
-		ballCollector.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		ballCollector_ = hardwareMap.dcMotor.get("ball collector");
+		ballCollector_.setDirection(DcMotor.Direction.REVERSE);
+		ballCollector_.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 		liftMotor1 = hardwareMap.dcMotor.get("lift motor 1");
 		liftMotor1.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -110,6 +131,21 @@ abstract class Archimedes extends LinearOpMode
 	void dropBallDeployer()
 	{
 		ballDeployer_.setPosition(1);
+	}
+
+	void startBallLauncherForAutonomous()
+	{
+		ballLauncher_.setPower(0.55);
+	}
+
+	void startBallLauncherForTeleop()
+	{
+		ballLauncher_.setPower(.75);
+	}
+
+	void stopBallLauncher()
+	{
+		ballLauncher_.setPower(0.0);
 	}
 
 	void clampCapBallGrabber()
@@ -172,28 +208,28 @@ abstract class Archimedes extends LinearOpMode
 
 	private int getGyroHeading()
 	{
-		int integratedGyroHeading = gyroSensor_.getHeading();
-		//359<-0
-		if (integratedGyroHeading - 180 > lastRawGyroHeading_)
+		int rawGyroHeading = gyroSensor_.getHeading();
+		// 0->360
+		if (rawGyroHeading - 180 > lastRawGyroHeading_)
 		{
 			gyroHeading_ =
-					gyroHeading_ + integratedGyroHeading - 360 -
+					gyroHeading_ + rawGyroHeading - 360 -
 							lastRawGyroHeading_;
 		}
-		//359->0
-		else if (integratedGyroHeading + 180 < lastRawGyroHeading_)
+		// 359->0
+		else if (rawGyroHeading + 180 < lastRawGyroHeading_)
 		{
 			gyroHeading_ =
-					gyroHeading_ + integratedGyroHeading + 360 -
+					gyroHeading_ + rawGyroHeading + 360 -
 							lastRawGyroHeading_;
 		}
 		else
 		{
 			gyroHeading_ =
-					gyroHeading_ + integratedGyroHeading - lastRawGyroHeading_;
+					gyroHeading_ + rawGyroHeading - lastRawGyroHeading_;
 		}
 
-		lastRawGyroHeading_ = integratedGyroHeading;
+		lastRawGyroHeading_ = rawGyroHeading;
 		return gyroHeading_;
 	}
 
@@ -208,10 +244,12 @@ abstract class Archimedes extends LinearOpMode
 	private double getDrivePower(double driveDistance, double power)
 	{
 		final double MINIMUM_DRIVE_POWER = .15;
+		final double EXPONENT_MULTIPLIER = 1;
 
-		double adjustedPower = Math.pow(MINIMUM_DRIVE_POWER,
-				Math.abs(getEncoderWheel().getCurrentPosition()) /
-						Math.abs(driveDistance));
+		double adjustedPower = Math.pow
+				(MINIMUM_DRIVE_POWER,
+						(Math.abs(getEncoderWheel().getCurrentPosition()) /
+						Math.abs(driveDistance)) * EXPONENT_MULTIPLIER);
 
 		if (driveDistance > 0)
 		{
@@ -238,11 +276,6 @@ abstract class Archimedes extends LinearOpMode
 		if (opModeIsActive())
 		{
 			getEncoderWheel().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-			if (maxDistance < 0)
-			{
-				power = power * -1;
-			}
 
 			while (!isDriveDistanceReached(encoderUnitsToDrive) &&
 					!isLineDetected(lightThreshold) && opModeIsActive())
@@ -287,8 +320,8 @@ abstract class Archimedes extends LinearOpMode
 				rightOpticalDistanceSensor_.getLightDetected() > lightThreshold;
 	}
 
-	void followBeaconLine(double power, int maxDriveDistance,
-	                      int distanceFromWall)
+	void followBeaconLineToWall(double power, int maxDriveDistance,
+	                            int distanceFromWall)
 	{
 		double encoderUnitsToDrive =
 				ENCODER_UNITS_PER_MILLIMETER * maxDriveDistance;
@@ -374,12 +407,12 @@ abstract class Archimedes extends LinearOpMode
 		telemetry.update();
 	}
 
-	boolean hasDetectedBlue()
+	boolean isDetectingBlueOnRight()
 	{
 		return colorSensor_.blue() > colorSensor_.red();
 	}
 
-	boolean hasDetectedRed()
+	boolean isDetectingRedOnRight()
 	{
 		return colorSensor_.blue() < colorSensor_.red();
 	}
@@ -420,9 +453,9 @@ abstract class Archimedes extends LinearOpMode
 		final double EXPONENT_MULTIPLIER = 1.25;
 
 		double adjustedPower =
-				Math.pow(MINIMUM_TURN_POWER, EXPONENT_MULTIPLIER * (1 - Math
+				Math.pow(MINIMUM_TURN_POWER, (1 - Math
 						.abs(targetGyroHeading_ - getGyroHeading()) /
-						Math.abs(angleChange)));
+						Math.abs(angleChange)) * EXPONENT_MULTIPLIER);
 
 		if (angleChange > 0)
 		{

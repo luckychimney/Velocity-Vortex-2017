@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
+@TeleOp(name = "TeleOp")
 public class ArchimedesTeleOp extends Archimedes
 {
 	@Override
@@ -25,13 +26,12 @@ public class ArchimedesTeleOp extends Archimedes
 
 		while (opModeIsActive())
 		{
-			/*
-			* Driver
-			 */
-
+			// Driver Controls
 			if (Math.abs(gamepad1.right_stick_y) > DEAD_ZONE)
 			{
-				rightMotorSpeed = gamepad1.right_stick_y;
+				rightMotorSpeed = gamepad1.right_stick_y > 0 ? Math.pow
+						(gamepad1.right_stick_y, 2) : -Math.pow(gamepad1
+						.right_stick_y, 2);
 			}
 			else
 			{
@@ -40,7 +40,9 @@ public class ArchimedesTeleOp extends Archimedes
 
 			if (Math.abs(gamepad1.left_stick_y) > DEAD_ZONE)
 			{
-				leftMotorSpeed = gamepad1.left_stick_y;
+				leftMotorSpeed = gamepad1.left_stick_y > 0 ? Math.pow
+						(gamepad1.left_stick_y, 2) : -Math.pow(gamepad1
+						.left_stick_y, 2);
 			}
 			else
 			{
@@ -66,10 +68,8 @@ public class ArchimedesTeleOp extends Archimedes
 					idle();
 				}
 			}
-			/*
-			* Gunner
-			 */
 
+			// Gunner Controls
 			if (gamepad2.right_trigger > 0)
 			{
 				liftBallDeployer();
@@ -81,24 +81,24 @@ public class ArchimedesTeleOp extends Archimedes
 
 			if (gamepad2.left_trigger > 0)
 			{
-				ballLauncher.setPower(0.75);
+				startBallLauncherForTeleop();
 			}
 			else
 			{
-				ballLauncher.setPower(0);
+				stopBallLauncher();
 			}
 
 			if (gamepad2.left_bumper)
 			{
-				ballCollector.setPower(1);
+				startBallCollector();
 			}
 			else if (gamepad2.right_bumper)
 			{
-				ballCollector.setPower(-1);
+				reverseBallCollector();
 			}
 			else
 			{
-				ballCollector.setPower(0);
+				stopBallCollector();
 			}
 
 			if (gamepad2.dpad_up)
@@ -131,10 +131,7 @@ public class ArchimedesTeleOp extends Archimedes
 				setButtonPusherToNeutral();
 			}
 
-			liftMotor1.setPower(-gamepad2.right_stick_y);
-			liftMotor2.setPower(liftMotor1.getPower());
-
-			//FIXME The controls are literally flipped AND reversed
+			setLiftPower(gamepad2.right_stick_y);
 
 			if (isDriveControlsReversed)
 			{

@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Red Autonomous 3")
+@Autonomous(name = "Red Autonomous 3", group = "Red")
 public class RedAutonomous3 extends Archimedes
 {
 	@Override
@@ -17,15 +17,18 @@ public class RedAutonomous3 extends Archimedes
 			telemetry.addData(">", "Archimedes running...");
 			telemetry.update();
 
-			ballLauncher.setPower(0.55);
-			drive(DEFAULT_DRIVE_SPEED, 500);
+			// Launch balls into center vortex.
+			startBallLauncherForAutonomous();
+			drive(DEFAULT_DRIVE_SPEED, 550);
 			sleep(1500);
 			launchBall(1000);
 			sleep(1500);
 			launchBall(1000);
 			sleep(1500);
-			ballLauncher.setPower(0);
+			stopBallLauncher();
 
+			// Drive towards the center vortex, knock off the cap ball, turn
+			// around and park.
 			drive(DEFAULT_DRIVE_SPEED, 600);
 			turn(0.75, -135);
 			timeDrive(-DEFAULT_DRIVE_SPEED, 1000);
