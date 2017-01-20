@@ -37,8 +37,10 @@ public class RedAutonomous1 extends Archimedes
 			turnButtonPusherLeft();
 			followBeaconLineToWall(0.25, 200, 10);
 			sleep(500);
-			if(isDetectingRedOnRight())
+			if (isDetectingRedOnRight())
+			{
 				turnButtonPusherRight();
+			}
 			sleep(750);
 			timeDrive(.5, 500);
 			drive(1, -125);

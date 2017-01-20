@@ -37,15 +37,17 @@ public class BlueAutonomous1 extends Archimedes
 			turnButtonPusherLeft();
 			followBeaconLineToWall(0.2, 300, 10);
 			sleep(500);
-			if(isDetectingBlueOnRight())
+			if (isDetectingBlueOnRight())
+			{
 				turnButtonPusherRight();
+			}
 			sleep(750);
 			timeDrive(.5, 500);
 			drive(1, -125);
 
 			// As a safety feature, check to see the color of the beacon, if it
 			// is blue, wait 5 seconds and press the beacon again.
-			while(opModeIsActive())
+			while (opModeIsActive())
 			{
 				turnButtonPusherLeft();
 				sleep(1000);

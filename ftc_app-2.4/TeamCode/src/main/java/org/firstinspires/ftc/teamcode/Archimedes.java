@@ -339,10 +339,12 @@ abstract class Archimedes extends LinearOpMode
 					&& opModeIsActive())
 			{
 				leftAdjustedPower = Range.clip(
-						getDrivePower(maxDriveDistance, power) - getOdsPowerAdjustment(), -1,
+						getDrivePower(maxDriveDistance, power) -
+								getOdsPowerAdjustment(), -1,
 						1);
 				rightAdjustedPower = Range.clip(
-						getDrivePower(maxDriveDistance, power) + getOdsPowerAdjustment(), -1,
+						getDrivePower(maxDriveDistance, power) +
+								getOdsPowerAdjustment(), -1,
 						1);
 				leftMotor.setPower(leftAdjustedPower);
 				rightMotor.setPower(rightAdjustedPower);
@@ -449,7 +451,7 @@ abstract class Archimedes extends LinearOpMode
 		double adjustedPower = ((1 - MINIMUM_TURN_POWER) - (1 - power)) *
 				Math.pow((Math.abs(
 						targetGyroHeading_ - getGyroHeading()) /
-						Math.abs(angleChange)),
+								Math.abs(angleChange)),
 						2) + MINIMUM_TURN_POWER;
 
 		if (angleChange > 0)
