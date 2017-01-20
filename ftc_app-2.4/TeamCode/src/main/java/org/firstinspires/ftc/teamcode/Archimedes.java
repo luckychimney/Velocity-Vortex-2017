@@ -167,7 +167,8 @@ abstract class Archimedes extends LinearOpMode
 
 		if (opModeIsActive())
 		{
-			getEncoderWheel().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+			leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+			rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 			while (!isDriveDistanceReached(encoderUnitsToDrive) &&
 					opModeIsActive())
@@ -190,7 +191,7 @@ abstract class Archimedes extends LinearOpMode
 
 	private boolean isDriveDistanceReached(double driveDistance)
 	{
-		return Math.abs(getEncoderWheel().getCurrentPosition()) <
+		return Math.abs(getEncoderWheel().getCurrentPosition()) >=
 				Math.abs(driveDistance);
 	}
 
@@ -246,7 +247,7 @@ abstract class Archimedes extends LinearOpMode
 		final double MINIMUM_DRIVE_POWER = .15;
 
 		double adjustedPower = ((1 - MINIMUM_DRIVE_POWER) - (1 - power)) *
-				Math.pow(Math.abs(
+				Math.pow(1 - Math.abs(
 						getEncoderWheel().getCurrentPosition() / driveDistance),
 						2) + MINIMUM_DRIVE_POWER;
 
@@ -333,20 +334,15 @@ abstract class Archimedes extends LinearOpMode
 			leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 			rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-			if (maxDriveDistance < 0)
-			{
-				power = power * -1;
-			}
-
 			while (!isDriveDistanceReached(encoderUnitsToDrive) &&
 					!isWallInRangeThreshold(distanceFromWall)
 					&& opModeIsActive())
 			{
 				leftAdjustedPower = Range.clip(
-						power - getOdsPowerAdjustment(), -1,
+						getDrivePower(maxDriveDistance, power) - getOdsPowerAdjustment(), -1,
 						1);
 				rightAdjustedPower = Range.clip(
-						power + getOdsPowerAdjustment(), -1,
+						getDrivePower(maxDriveDistance, power) + getOdsPowerAdjustment(), -1,
 						1);
 				leftMotor.setPower(leftAdjustedPower);
 				rightMotor.setPower(rightAdjustedPower);
@@ -360,7 +356,7 @@ abstract class Archimedes extends LinearOpMode
 
 	private boolean isWallInRangeThreshold(int threshold)
 	{
-		return rangeSensor_.cmUltrasonic() > threshold;
+		return rangeSensor_.cmUltrasonic() <= threshold;
 	}
 
 	private double getOdsPowerAdjustment()
@@ -448,11 +444,12 @@ abstract class Archimedes extends LinearOpMode
 
 	private double getTurnPower(double angleChange, double power)
 	{
-		final double MINIMUM_TURN_POWER = .35;
+		final double MINIMUM_TURN_POWER = 0.35;
 
 		double adjustedPower = ((1 - MINIMUM_TURN_POWER) - (1 - power)) *
-				Math.pow(1 - (Math.abs(
-						targetGyroHeading_ - getGyroHeading() / angleChange)),
+				Math.pow((Math.abs(
+						targetGyroHeading_ - getGyroHeading()) /
+						Math.abs(angleChange)),
 						2) + MINIMUM_TURN_POWER;
 
 		if (angleChange > 0)

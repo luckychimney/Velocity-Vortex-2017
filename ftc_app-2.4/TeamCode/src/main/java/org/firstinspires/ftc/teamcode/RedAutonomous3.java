@@ -19,7 +19,7 @@ public class RedAutonomous3 extends Archimedes
 
 			// Launch balls into center vortex.
 			startBallLauncherForAutonomous();
-			drive(DEFAULT_DRIVE_SPEED, 550);
+			drive(1, 675);
 			sleep(1500);
 			launchBall(1000);
 			sleep(1500);
@@ -29,8 +29,8 @@ public class RedAutonomous3 extends Archimedes
 
 			// Drive towards the center vortex, knock off the cap ball, turn
 			// around and park.
-			drive(DEFAULT_DRIVE_SPEED, 600);
-			turn(0.75, -135);
+			drive(1, 600);
+			turn(1, -100);
 			timeDrive(-DEFAULT_DRIVE_SPEED, 1000);
 		}
 	}

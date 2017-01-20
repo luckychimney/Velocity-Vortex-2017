@@ -29,13 +29,13 @@ public class RedAutonomous1 extends Archimedes
 			// Go towards the beacon line and turn onto it.
 			turn(DEFAULT_TURN_SPEED, -41);
 			// drive(1, 1000);
-			driveToLine(0.15, 1300, 0.15, 75);
+			driveToLine(0.5, 1150, 0.15, 75);
 			turn(0.5, -49);
 
 			// Follow the line up to the beacon, detect the color and press
 			// the right button.
 			turnButtonPusherLeft();
-			followBeaconLineToWall(0.2, 300, 10);
+			followBeaconLineToWall(0.25, 200, 10);
 			sleep(500);
 			if(isDetectingRedOnRight())
 				turnButtonPusherRight();
@@ -45,15 +45,21 @@ public class RedAutonomous1 extends Archimedes
 
 			// As a safety feature, check to see the color of the beacon, if it
 			// is blue, wait 5 seconds and press the beacon again.
-			turnButtonPusherLeft();
-			sleep(500);
-			if(isDetectingBlueOnRight())
+			while (opModeIsActive())
 			{
-				setButtonPusherToNeutral();
-				sleep(5000);
-				timeDrive(.5, 750);
-				drive(1, -125);
-				stop();
+				turnButtonPusherLeft();
+				sleep(1000);
+				if (isDetectingBlueOnRight())
+				{
+					setButtonPusherToNeutral();
+					sleep(5000);
+					timeDrive(.5, 750);
+					drive(1, -125);
+				}
+				else
+				{
+					stop();
+				}
 			}
 
 			/*

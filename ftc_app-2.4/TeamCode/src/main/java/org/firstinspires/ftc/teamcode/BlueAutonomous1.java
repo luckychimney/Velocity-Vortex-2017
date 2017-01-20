@@ -27,10 +27,10 @@ public class BlueAutonomous1 extends Archimedes
 			stopBallLauncher();
 
 			// Go towards the beacon line and turn onto it.
-			turn(DEFAULT_TURN_SPEED, 49);
+			turn(DEFAULT_TURN_SPEED, 48);
 			// drive(1, 1000);
-			driveToLine(0.15, 1300, 0.15, 75);
-			turn(0.5, 41);
+			driveToLine(0.85, 1450, 0.15, 75);
+			turn(0.5, 42);
 
 			// Follow the line up to the beacon, detect the color and press
 			// the right button.
@@ -45,16 +45,23 @@ public class BlueAutonomous1 extends Archimedes
 
 			// As a safety feature, check to see the color of the beacon, if it
 			// is blue, wait 5 seconds and press the beacon again.
-			turnButtonPusherLeft();
-			sleep(500);
-			if(isDetectingRedOnRight())
+			while(opModeIsActive())
 			{
-				setButtonPusherToNeutral();
-				sleep(5000);
-				timeDrive(.5, 750);
-				drive(1, -125);
-				stop();
+				turnButtonPusherLeft();
+				sleep(1000);
+				if (isDetectingRedOnRight())
+				{
+					setButtonPusherToNeutral();
+					sleep(5000);
+					timeDrive(.5, 750);
+					drive(1, -125);
+				}
+				else
+				{
+					stop();
+				}
 			}
+
 
 			/*
 			turn(0.75, -90);
