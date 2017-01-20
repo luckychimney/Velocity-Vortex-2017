@@ -11,15 +11,13 @@ public class RedAutonomous3 extends Archimedes
 		initializeArchimedes();
 		waitForGyroCalibration();
 		waitForStart();
+		startArchimedes();
 
 		if (opModeIsActive())
 		{
-			telemetry.addData(">", "Archimedes running...");
-			telemetry.update();
-
 			// Launch balls into center vortex.
 			startBallLauncherForAutonomous();
-			drive(1, 675);
+			drive(DEFAULT_DRIVE_SPEED, 675);
 			sleep(1500);
 			launchBall(1000);
 			sleep(1500);
@@ -29,9 +27,9 @@ public class RedAutonomous3 extends Archimedes
 
 			// Drive towards the center vortex, knock off the cap ball, turn
 			// around and park.
-			drive(1, 600);
-			turn(1, -100);
-			timeDrive(-DEFAULT_DRIVE_SPEED, 1000);
+			drive(DEFAULT_DRIVE_SPEED, 600);
+			turn(DEFAULT_DRIVE_SPEED, -100);
+			timeDrive(-0.65, 1000);
 		}
 	}
 }

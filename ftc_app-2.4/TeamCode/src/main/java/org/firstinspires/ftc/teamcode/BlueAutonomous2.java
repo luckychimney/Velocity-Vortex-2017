@@ -11,15 +11,13 @@ public class BlueAutonomous2 extends Archimedes
 		initializeArchimedes();
 		waitForGyroCalibration();
 		waitForStart();
+		startArchimedes();
 
 		if (opModeIsActive())
 		{
-			telemetry.addData(">", "Archimedes running...");
-			telemetry.update();
-
 			// Launch balls into center vortex.
 			startBallLauncherForAutonomous();
-			drive(1, 400);
+			drive(DEFAULT_DRIVE_SPEED, 400);
 			sleep(1500);
 			launchBall(1000);
 			sleep(1500);
@@ -29,9 +27,9 @@ public class BlueAutonomous2 extends Archimedes
 
 			// Drive towards the center vortex, knock off the cap ball, turn
 			// around and park.
-			drive(1, 400);
+			drive(DEFAULT_DRIVE_SPEED, 400);
 			turn(DEFAULT_TURN_SPEED, 175);
-			timeDrive(-DEFAULT_DRIVE_SPEED, 1000);
+			timeDrive(-0.65, 1000);
 		}
 	}
 }

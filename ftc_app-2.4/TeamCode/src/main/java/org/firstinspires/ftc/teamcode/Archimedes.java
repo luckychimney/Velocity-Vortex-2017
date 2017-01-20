@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.util.Range;
 
 abstract class Archimedes extends LinearOpMode
 {
-	final double DEFAULT_DRIVE_SPEED = 0.65;
-	final double DEFAULT_TURN_SPEED = 0.5;
+	final double DEFAULT_DRIVE_SPEED = 1.0;
+	final double DEFAULT_TURN_SPEED = 0.85;
 
 	private final int ENCODER_UNITS_PER_REVOLUTION = 1440;
 	private final double ENCODER_WHEEL_DIAMETER = 50.2;
@@ -34,9 +34,12 @@ abstract class Archimedes extends LinearOpMode
 	private Servo buttonPusher_;
 
 	private ColorSensor colorSensor_;
-	private ModernRoboticsI2cRangeSensor rangeSensor_;
-	private OpticalDistanceSensor leftOpticalDistanceSensor_;
-	private OpticalDistanceSensor rightOpticalDistanceSensor_;
+	private ModernRoboticsI2cRangeSensor leftRangeSensor_;
+	private ModernRoboticsI2cRangeSensor rightRangeSensor_;
+	private OpticalDistanceSensor leftCenterOds_;
+	private OpticalDistanceSensor rightCenterOds_;
+	private OpticalDistanceSensor leftOutsideOds_;
+	private OpticalDistanceSensor rightOutsideOds_;
 	private GyroSensor gyroSensor_;
 
 	private int lastRawGyroHeading_ = 0;
@@ -44,103 +47,149 @@ abstract class Archimedes extends LinearOpMode
 	private int targetGyroHeading_ = 0;
 	private ElapsedTime elapsedTime_ = new ElapsedTime();
 
+	void startArchimedes()
+	{
+		if (opModeIsActive())
+		{
+			telemetry.addData(">", "Archimedes running...");
+			telemetry.update();
+		}
+	}
+
 	void setLiftPower(double power)
 	{
-		liftMotor1.setPower(-power);
-		liftMotor2.setPower(liftMotor1.getPower());
+		if (opModeIsActive())
+		{
+			liftMotor1.setPower(-power);
+			liftMotor2.setPower(liftMotor1.getPower());
+		}
 	}
 
 	void startBallCollector()
 	{
-		ballCollector_.setPower(1);
+		if (opModeIsActive())
+		{
+			ballCollector_.setPower(1);
+		}
 	}
 
 	void stopBallCollector()
 	{
-		ballCollector_.setPower(0);
+		if (opModeIsActive())
+		{
+			ballCollector_.setPower(0);
+		}
 	}
 
 	void reverseBallCollector()
 	{
-		ballCollector_.setPower(-1);
+		if (opModeIsActive())
+		{
+			ballCollector_.setPower(-1);
+		}
 	}
 
 	void initializeArchimedes()
 	{
-		leftMotor = hardwareMap.dcMotor.get("left motor");
-		leftMotor.setDirection(DcMotor.Direction.REVERSE);
-		leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		if (opModeIsActive())
+		{
+			leftMotor = hardwareMap.dcMotor.get("left motor");
+			leftMotor.setDirection(DcMotor.Direction.REVERSE);
+			leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-		rightMotor = hardwareMap.dcMotor.get("right motor");
-		rightMotor.setDirection(DcMotor.Direction.FORWARD);
-		rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+			rightMotor = hardwareMap.dcMotor.get("right motor");
+			rightMotor.setDirection(DcMotor.Direction.FORWARD);
+			rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-		ballLauncher_ = hardwareMap.dcMotor.get("ball launcher");
-		ballLauncher_.setDirection(DcMotor.Direction.REVERSE);
-		ballLauncher_.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-		ballLauncher_.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		ballLauncher_.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+			ballLauncher_ = hardwareMap.dcMotor.get("ball launcher");
+			ballLauncher_.setDirection(DcMotor.Direction.REVERSE);
+			ballLauncher_.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+			ballLauncher_.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+			ballLauncher_.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-		ballCollector_ = hardwareMap.dcMotor.get("ball collector");
-		ballCollector_.setDirection(DcMotor.Direction.REVERSE);
-		ballCollector_.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+			ballCollector_ = hardwareMap.dcMotor.get("ball collector");
+			ballCollector_.setDirection(DcMotor.Direction.REVERSE);
+			ballCollector_.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-		liftMotor1 = hardwareMap.dcMotor.get("lift motor 1");
-		liftMotor1.setDirection(DcMotorSimple.Direction.FORWARD);
+			liftMotor1 = hardwareMap.dcMotor.get("lift motor 1");
+			liftMotor1.setDirection(DcMotorSimple.Direction.FORWARD);
 
-		liftMotor2 = hardwareMap.dcMotor.get("lift motor 2");
-		liftMotor2.setDirection(DcMotorSimple.Direction.FORWARD);
+			liftMotor2 = hardwareMap.dcMotor.get("lift motor 2");
+			liftMotor2.setDirection(DcMotorSimple.Direction.FORWARD);
 
-		capBallGrabber_ = hardwareMap.servo.get("cap ball grabber");
-		capBallGrabber_.setDirection(Servo.Direction.FORWARD);
-		dropCapBallGrabber();
+			capBallGrabber_ = hardwareMap.servo.get("cap ball grabber");
+			capBallGrabber_.setDirection(Servo.Direction.FORWARD);
+			dropCapBallGrabber();
 
-		buttonPusher_ = hardwareMap.servo.get("button pusher");
-		buttonPusher_.setDirection(Servo.Direction.FORWARD);
-		setButtonPusherToNeutral();
+			buttonPusher_ = hardwareMap.servo.get("button pusher");
+			buttonPusher_.setDirection(Servo.Direction.FORWARD);
+			setButtonPusherToNeutral();
 
-		ballDeployer_ = hardwareMap.servo.get("ball deployer");
-		ballDeployer_.setDirection(Servo.Direction.FORWARD);
-		dropBallDeployer();
+			ballDeployer_ = hardwareMap.servo.get("ball deployer");
+			ballDeployer_.setDirection(Servo.Direction.FORWARD);
+			dropBallDeployer();
 
-		colorSensor_ = hardwareMap.colorSensor.get("color sensor");
+			colorSensor_ = hardwareMap.colorSensor.get("color sensor");
 
-		rangeSensor_ = hardwareMap
-				.get(ModernRoboticsI2cRangeSensor.class, "range sensor");
+			leftRangeSensor_ = hardwareMap
+					.get(ModernRoboticsI2cRangeSensor.class, "left range " +
+							"sensor");
+			rightRangeSensor_ = hardwareMap
+					.get(ModernRoboticsI2cRangeSensor.class, "right range " +
+							"sensor");
 
-		leftOpticalDistanceSensor_ =
-				hardwareMap.opticalDistanceSensor.get("left ODS");
+			leftCenterOds_ =
+					hardwareMap.opticalDistanceSensor.get("left center ODS");
+			rightCenterOds_ =
+					hardwareMap.opticalDistanceSensor.get("right center ODS");
+			leftOutsideOds_ =
+					hardwareMap.opticalDistanceSensor.get("left outside ODS");
+			rightOutsideOds_ =
+					hardwareMap.opticalDistanceSensor.get("right outside ODS");
 
-		rightOpticalDistanceSensor_ =
-				hardwareMap.opticalDistanceSensor.get("right ODS");
-
-		gyroSensor_ = hardwareMap.gyroSensor.get("gyro");
-		gyroSensor_.calibrate();
+			gyroSensor_ = hardwareMap.gyroSensor.get("gyro");
+			gyroSensor_.calibrate();
+		}
 	}
 
 	void dropCapBallGrabber()
 	{
-		capBallGrabber_.setPosition(0);
+		if (opModeIsActive())
+		{
+			capBallGrabber_.setPosition(0);
+		}
 	}
 
 	void setButtonPusherToNeutral()
 	{
-		buttonPusher_.setPosition(.3);
+		if (opModeIsActive())
+		{
+			buttonPusher_.setPosition(.3);
+		}
 	}
 
 	void dropBallDeployer()
 	{
-		ballDeployer_.setPosition(1);
+		if (opModeIsActive())
+		{
+			ballDeployer_.setPosition(1);
+		}
 	}
 
 	void startBallLauncherForAutonomous()
 	{
-		ballLauncher_.setPower(0.55);
+		if (opModeIsActive())
+		{
+			ballLauncher_.setPower(0.55);
+		}
 	}
 
 	void startBallLauncherForTeleop()
 	{
-		ballLauncher_.setPower(.75);
+		if (opModeIsActive())
+		{
+			ballLauncher_.setPower(.75);
+		}
 	}
 
 	void stopBallLauncher()
@@ -150,12 +199,18 @@ abstract class Archimedes extends LinearOpMode
 
 	void clampCapBallGrabber()
 	{
-		capBallGrabber_.setPosition(0.5);
+		if (opModeIsActive())
+		{
+			capBallGrabber_.setPosition(0.5);
+		}
 	}
 
 	void liftCapBallGrabber()
 	{
-		capBallGrabber_.setPosition(0.85);
+		if (opModeIsActive())
+		{
+			capBallGrabber_.setPosition(0.85);
+		}
 	}
 
 	void drive(double power, int distance)
@@ -316,8 +371,8 @@ abstract class Archimedes extends LinearOpMode
 
 	private boolean isLineDetected(double lightThreshold)
 	{
-		return leftOpticalDistanceSensor_.getLightDetected() > lightThreshold &&
-				rightOpticalDistanceSensor_.getLightDetected() > lightThreshold;
+		return leftCenterOds_.getLightDetected() > lightThreshold &&
+				rightCenterOds_.getLightDetected() > lightThreshold;
 	}
 
 	void followBeaconLineToWall(double power, int maxDriveDistance,
@@ -358,33 +413,42 @@ abstract class Archimedes extends LinearOpMode
 
 	private boolean isWallInRangeThreshold(int threshold)
 	{
-		return rangeSensor_.cmUltrasonic() <= threshold;
+		return leftRangeSensor_.cmUltrasonic() <= threshold;
 	}
 
 	private double getOdsPowerAdjustment()
 	{
 		final double OPTICAL_DISTANCE_SENSOR_COEFFICIENT = 0.65;
 
-		return (rightOpticalDistanceSensor_.getLightDetected() -
-				leftOpticalDistanceSensor_.getLightDetected()) *
+		return (rightCenterOds_.getLightDetected() -
+				leftCenterOds_.getLightDetected()) *
 				OPTICAL_DISTANCE_SENSOR_COEFFICIENT;
 	}
 
 	void turnButtonPusherRight()
 	{
-		buttonPusher_.setPosition(0);
+		if (opModeIsActive())
+		{
+			buttonPusher_.setPosition(0);
+		}
 	}
 
 	void launchBall(int delay)
 	{
-		liftBallDeployer();
+		if (opModeIsActive())
+		{
+			liftBallDeployer();
+		}
 		sleep(delay);
 		dropBallDeployer();
 	}
 
 	void liftBallDeployer()
 	{
-		ballDeployer_.setPosition(.75);
+		if (opModeIsActive())
+		{
+			ballDeployer_.setPosition(.75);
+		}
 	}
 
 	void waitForGyroCalibration()
@@ -418,7 +482,9 @@ abstract class Archimedes extends LinearOpMode
 	{
 		if (opModeIsActive())
 		{
-			getEncoderWheel().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+			rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+			leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 			changeTargetGyroHeading(angleChange);
 
 			while (!isHeadingReached(angleChange) && opModeIsActive())
@@ -469,9 +535,17 @@ abstract class Archimedes extends LinearOpMode
 		targetGyroHeading_ += headingChange;
 	}
 
+	private void setTargetGyroHeading(int heading)
+	{
+		targetGyroHeading_ = heading;
+	}
+
 	void turnButtonPusherLeft()
 	{
-		buttonPusher_.setPosition(.6);
+		if (opModeIsActive())
+		{
+			buttonPusher_.setPosition(.6);
+		}
 	}
 
 	void timeDrive(double power, int time)
@@ -495,5 +569,14 @@ abstract class Archimedes extends LinearOpMode
 		}
 
 		stopDriveMotors();
+	}
+
+	private double getRangeSensorPowerAdjustment()
+	{
+		final double RANGE_SENSOR_COEFFICIENT = 0.06;
+
+		return (rightRangeSensor_.cmUltrasonic() -
+				leftRangeSensor_.cmUltrasonic()) *
+				RANGE_SENSOR_COEFFICIENT;
 	}
 }
