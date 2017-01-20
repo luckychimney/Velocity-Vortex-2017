@@ -32,7 +32,7 @@ public class BlueAutonomous1 extends Archimedes
 			// Follow the line up to the beacon, detect the color and press
 			// the right button.
 			turnButtonPusherLeft();
-			followBeaconLineToWall(0.2, 300, 10);
+			followBeaconLineToWall(0.5, 7);
 			sleep(500);
 			if (isDetectingBlueOnRight())
 			{
