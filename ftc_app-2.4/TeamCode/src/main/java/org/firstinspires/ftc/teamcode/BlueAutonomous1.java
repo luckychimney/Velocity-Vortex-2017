@@ -2,6 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+/**
+ * Delivers two balls into the center vortex, then presses one of the beacon
+ * buttons. Is set up on the blue side of the field.
+ *
+ * @author got robot?
+ * @since 2017-01-20
+ */
 @Autonomous(name = "Blue Autonomous 1", group = "Blue")
 public class BlueAutonomous1 extends Archimedes
 {
