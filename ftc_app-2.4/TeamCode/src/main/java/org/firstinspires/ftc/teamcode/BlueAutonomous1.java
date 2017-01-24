@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
  *
  * @author got robot?
  */
-@Autonomous(name = "Blue: Beacons #1", group = "Blue")
+@Autonomous(name = "Blue: Beacons", group = "Blue")
 public class BlueAutonomous1 extends Archimedes
 {
 	@Override
