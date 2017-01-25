@@ -91,7 +91,7 @@ public class ArchimedesTeleOp extends Archimedes
 				dropBallDeployer();
 
 			if (gamepad2.left_trigger > 0)
-				startBallLauncherForTeleop();
+				startBallLauncherAtHighPower();
 			else
 				stopBallLauncher();
 

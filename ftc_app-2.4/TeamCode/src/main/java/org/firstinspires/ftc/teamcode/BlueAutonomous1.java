@@ -22,7 +22,7 @@ public class BlueAutonomous1 extends Archimedes
 		if (opModeIsActive())
 		{
 			// Launch balls into center vortex.
-			startBallLauncherForAutonomous();
+			startBallLauncherAtLowPower();
 			drive(DEFAULT_DRIVE_POWER, 300);
 			sleep(1500);
 			launchBall(1000);
@@ -63,7 +63,12 @@ public class BlueAutonomous1 extends Archimedes
 					sleep(5000);
 					timeDrive(.5, 500);
 					drive(DEFAULT_DRIVE_POWER, -70);
+					stop();
 				}
+			}
+			else
+			{
+				//TODO Do something here to correct the positioning
 			}
 		}
 	}
