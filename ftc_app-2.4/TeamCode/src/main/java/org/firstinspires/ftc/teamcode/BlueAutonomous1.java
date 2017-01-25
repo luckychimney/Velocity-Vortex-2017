@@ -2,7 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Blue Autonomous 1", group = "Blue")
+/**
+ * Delivers two balls into the center vortex, then presses one of the beacon
+ * buttons. Is set up on the default blue setup position.
+ *
+ * @author got robot?
+ */
+@Autonomous(name = "Blue: Beacons", group = "Blue")
 public class BlueAutonomous1 extends Archimedes
 {
 	@Override
@@ -11,76 +17,54 @@ public class BlueAutonomous1 extends Archimedes
 		initializeArchimedes();
 		waitForGyroCalibration();
 		waitForStart();
+		startArchimedes();
 
 		if (opModeIsActive())
 		{
-			telemetry.addData(">", "Archimedes running...");
-			telemetry.update();
-
 			// Launch balls into center vortex.
 			startBallLauncherForAutonomous();
-			drive(1, 300);
+			drive(DEFAULT_DRIVE_POWER, 300);
 			sleep(1500);
 			launchBall(1000);
 			sleep(1500);
 			launchBall(1000);
 			stopBallLauncher();
 
-			// Go towards the beacon line and turn onto it.
-			turn(DEFAULT_TURN_SPEED, 48);
-			// drive(1, 1000);
-			driveToLine(0.85, 1450, 0.15, 75);
-			turn(0.5, 42);
+			// Turn toward the beacon line, drive to it and then turn into it.
+			turn(DEFAULT_TURN_POWER, 48);
+			driveToLine(DEFAULT_DRIVE_POWER, 1450, 0.15, 75);
+			turn(DEFAULT_TURN_POWER, 42);
 
-			// Follow the line up to the beacon, detect the color and press
-			// the right button.
-			turnButtonPusherLeft();
-			followBeaconLineToWall(0.2, 300, 10);
-			sleep(500);
-			if (isDetectingBlueOnRight())
-			{
-				turnButtonPusherRight();
-			}
-			sleep(750);
-			timeDrive(.5, 500);
-			drive(1, -125);
+			// Follow the line up to the beacon.
+			turnButtonPusherLeft(); // This is needed to expose the color sensor
+			followBeaconLineToWall(DEFAULT_DRIVE_POWER, 9);
 
-			// As a safety feature, check to see the color of the beacon, if it
-			// is blue, wait 5 seconds and press the beacon again.
-			while (opModeIsActive())
+			// Detect if the robot is lined up with the beacon, if it is then
+			// detect what color is the blue one and press it
+			if (isAlignedWithBeacon())
 			{
+				sleep(500);
+				if (isDetectingBlueOnRight())
+				{
+					turnButtonPusherRight();
+					sleep(500);
+				}
+				timeDrive(.5, 500);
+				drive(DEFAULT_DRIVE_POWER, -70);
+
+				// As a safety feature, check the color of the beacon, if it is
+				// red, wait 5 seconds and press the beacon again.
 				turnButtonPusherLeft();
 				sleep(1000);
+
 				if (isDetectingRedOnRight())
 				{
 					setButtonPusherToNeutral();
 					sleep(5000);
-					timeDrive(.5, 750);
-					drive(1, -125);
-				}
-				else
-				{
-					stop();
+					timeDrive(.5, 500);
+					drive(DEFAULT_DRIVE_POWER, -70);
 				}
 			}
-
-
-			/*
-			turn(0.75, -90);
-			drive(DEFAULT_DRIVE_SPEED, 900);
-			driveToLine(0.15, 300, 0.15, 75);
-
-			turn(.5, 90);
-			turnButtonPusherLeft();
-			followBeaconLineToWall(0.25, 300, 10);
-			sleep(500);
-			if(isDetectingBlueOnRight())
-			{
-				turnButtonPusherRight();
-			}
-			sleep(750);
-			timeDrive(DEFAULT_DRIVE_SPEED, 550);
-			timeDrive(-DEFAULT_DRIVE_SPEED, 500);*/
 		}
 	}
 }

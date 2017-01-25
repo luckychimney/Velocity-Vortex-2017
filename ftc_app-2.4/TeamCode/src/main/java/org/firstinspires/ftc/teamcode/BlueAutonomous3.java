@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Blue Autonomous 3", group = "Blue")
+@Autonomous(name = "Blue: Parking #2", group = "Blue")
 public class BlueAutonomous3 extends Archimedes
 {
 	@Override
@@ -11,15 +11,13 @@ public class BlueAutonomous3 extends Archimedes
 		initializeArchimedes();
 		waitForGyroCalibration();
 		waitForStart();
+		startArchimedes();
 
 		if (opModeIsActive())
 		{
-			telemetry.addData(">", "Archimedes running...");
-			telemetry.update();
-
 			// Launch balls into center vortex.
 			startBallLauncherForAutonomous();
-			drive(1, 650);
+			drive(DEFAULT_DRIVE_POWER, 650);
 			sleep(1500);
 			launchBall(1000);
 			sleep(1500);
@@ -29,9 +27,9 @@ public class BlueAutonomous3 extends Archimedes
 
 			// Drive towards the center vortex, knock off the cap ball, turn
 			// around and park.
-			drive(1, 300);
-			turn(1, 160);
-			timeDrive(-DEFAULT_DRIVE_SPEED, 1000);
+			drive(DEFAULT_DRIVE_POWER, 300);
+			turn(DEFAULT_TURN_POWER, 160);
+			timeDrive(-0.65, 1000);
 		}
 	}
 }
