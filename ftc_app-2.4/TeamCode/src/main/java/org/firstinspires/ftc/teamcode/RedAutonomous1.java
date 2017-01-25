@@ -54,22 +54,15 @@ public class RedAutonomous1 extends Archimedes
 
 				// As a safety feature, check the color of the beacon, if it is
 				// blue, wait 5 seconds and press the beacon again.
-				while (opModeIsActive())
-				{
-					turnButtonPusherLeft();
-					sleep(1000);
+				turnButtonPusherLeft();
+				sleep(1000);
 
-					if (isDetectingBlueOnRight())
-					{
-						setButtonPusherToNeutral();
-						sleep(5000);
-						timeDrive(.5, 500);
-						drive(DEFAULT_DRIVE_POWER, -70);
-					}
-					else
-					{
-						stop();
-					}
+				if (isDetectingBlueOnRight())
+				{
+					setButtonPusherToNeutral();
+					sleep(5000);
+					timeDrive(.5, 500);
+					drive(DEFAULT_DRIVE_POWER, -70);
 				}
 			}
 		}
